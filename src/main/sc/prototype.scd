@@ -767,3 +767,200 @@ b = Buffer.alloc(s, 512, 1, { |buf| buf.chebyMsg([1,0,1,1,0,1])});
 
 b.free;
 
+// A more generic FM synthesis
+
+{SinOsc.ar(440 + (SinOsc.ar(220) * 5000))}.play
+
+(
+{
+	var modulator, modFreq, modIndex, amp;
+	modFreq = 440;
+	amp = 1;
+	modIndex = Line.kr(100, 2000, 5);
+	modulator = SinOsc.ar(modFreq) * modIndex;
+
+	SinOsc.ar(440 + modulator, 0, amp);
+}.play;
+)
+
+/*
+This way you will be able to have the freedom of different osc types
+The freqbus (at audiorate) is a oscillator times a modIndex + the carrier freq.
+1. Make a oscillator (sine, square, pulse etc) with the modFreq
+SinOsc.ar(modFreq)
+2. Multiply the modulator with the modIndex
+3. Add the carrierFreq to the modulator.
+4. Have that bus as the carrier freqbus
+SinOsc.ar(freqBus)
+
+val modFreq = staticControl(440f)
+val modIndex = staticControl(2000)
+val modOsc = sine(modFreq)
+val carrierFreq = staticControl(440f)
+val modulator = carrierFreq + (modOsc * modIndex)
+
+val carrier = sine(freq = modulator)
+*/
+
+
+(
+SynthDef(\fmSineOsc, {
+	arg dur = 1, freqBus = 0, modBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod;
+	Line.kr(dur:dur, doneAction:2);
+	amp = In.kr(ampBus, 1);
+	freq = In.kr(freqBus, 1);
+	mod = In.ar(modBus, 1);
+
+	sig = SinOsc.ar(freq + mod, mul:amp);
+	Out.ar(out, sig);
+}).add;
+
+SynthDef(\fmPulseOsc, {
+	arg dur = 1, freqBus = 0, modBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod;
+	Line.kr(dur:dur, doneAction:2);
+	amp = In.kr(ampBus, 1);
+	freq = In.kr(freqBus, 1);
+	mod = In.ar(modBus, 1);
+
+	sig = Pulse.ar(freq + mod, mul:amp);
+	Out.ar(out, sig);
+}).add;
+
+SynthDef(\fmSawOsc, {
+	arg dur = 1, freqBus = 0, modBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod;
+	Line.kr(dur:dur, doneAction:2);
+	amp = In.kr(ampBus, 1);
+	freq = In.kr(freqBus, 1);
+	mod = In.ar(modBus, 1);
+
+	sig = LFSaw.ar(freq + mod, mul:amp);
+	Out.ar(out, sig);
+}).add;
+
+SynthDef(\fmTriangleOsc, {
+	arg dur = 1, freqBus = 0, modBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod;
+	Line.kr(dur:dur, doneAction:2);
+	amp = In.kr(ampBus, 1);
+	freq = In.kr(freqBus, 1);
+	mod = In.ar(modBus, 1);
+
+	sig = LFTri.ar(freq + mod, mul:amp);
+	Out.ar(out, sig);
+}).add;
+
+SynthDef(\pmSineOsc, {
+	arg dur = 1, freqBus = 0, modBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod, conversion= 2pi/(s.sampleRate);
+	Line.kr(dur:dur, doneAction:2);
+	amp = In.kr(ampBus, 1);
+	freq = In.kr(freqBus, 1);
+	mod = In.ar(modBus, 1);
+
+	sig = SinOsc.ar(freq, mod * conversion, mul:amp);
+	Out.ar(out, sig);
+}).add;
+
+SynthDef(\pmPulseOsc, {
+	arg dur = 1, freqBus = 0, modBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod, conversion= 2pi/(s.sampleRate);
+	Line.kr(dur:dur, doneAction:2);
+	amp = In.kr(ampBus, 1);
+	freq = In.kr(freqBus, 1);
+	mod = In.ar(modBus, 1);
+
+	sig = Pulse.ar(freq, mod * conversion, mul:amp);
+	Out.ar(out, sig);
+}).add;
+
+SynthDef(\pmSawOsc, {
+	arg dur = 1, freqBus = 0, modBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod, conversion= 2pi/(s.sampleRate);
+	Line.kr(dur:dur, doneAction:2);
+	amp = In.kr(ampBus, 1);
+	freq = In.kr(freqBus, 1);
+	mod = In.ar(modBus, 1);
+
+	sig = LFSaw.ar(freq, mod * conversion, mul:amp);
+	Out.ar(out, sig);
+}).add;
+
+SynthDef(\pmTriangleOsc, {
+	arg dur = 1, freqBus = 0, modBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod, conversion= 2pi/(s.sampleRate);
+	Line.kr(dur:dur, doneAction:2);
+	amp = In.kr(ampBus, 1);
+	freq = In.kr(freqBus, 1);
+	mod = In.ar(modBus, 1);
+
+	sig = LFTri.ar(freq, mod * conversion, mul:amp);
+	Out.ar(out, sig);
+}).add;
+)
+
+// Perhaps try to implement and look at these
+// https://www.adsrsounds.com/fm8-tutorials/using-theory-behind-fm-synthesis-in-practice/
+// https://www.reddit.com/r/edmproduction/comments/1bc0xb/fm_synthesis_techniques_introduction_and_harmonic/
+// https://www.soundonsound.com/techniques/more-frequency-modulation
+// https://www.tinyloops.com/doc/yamaha_dx7/algorithms.html
+// https://yamahasynth.com/yamaha-synth-rss/basics-of-fm-synthesis
+(
+var dur = 13, modFreqBus = Bus.control(s, 1), modOut = Bus.audio(s, 1), modOscBus = Bus.audio(s, 1), modIndexBus = Bus.control(s, 1),
+carrierFreqBus = Bus.control(s, 1), amp = Bus.control(s, 1), panBus = Bus.control(s, 1), sigOut = Bus.audio(s, 1), carrierOut = Bus.audio(s, 1);
+
+Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 2, \startValue, 0.001, \peakValue, 0.2, \curve, \lin]);
+Synth(\lineControl, [\out, modFreqBus, \dur, dur, \startValue, 45.midicps, \endValue, 55.midicps]);
+Synth(\percControl, [\out, modIndexBus, \dur, dur, \attackTime, 8, \startValue, 5000, \peakValue, 30, \curve, \lin]);
+Synth(\lineControl, [\out, carrierFreqBus, \dur, dur, \startValue, 50.midicps, \endValue, 45.midicps]);
+Synth(\staticControl, [\out, panBus, \dur, dur, \value, 0]);
+Synth(\sineOsc, [\dur, dur, \out, modOut, \freqBus, modFreqBus, \ampBus, modIndexBus], addAction:\addToTail);
+Synth(\fmSineOsc, [\dur, dur, \out, sigOut, \freqBus, carrierFreqBus, \modBus, modOut, \ampBus, amp], addAction:\addToTail);
+Synth(\pan, [\in, sigOut, \panBus, panBus, \out, 0, \dur, dur], addAction:\addToTail);
+)
+
+
+
+/*
+We should probably make this different. modFreq * modIndex * conversion * SinOsc.ar(modFreq)
+*/
+(
+var dur = 13, modFreqBus = Bus.control(s, 1), modOut = Bus.audio(s, 1), modOscBus = Bus.audio(s, 1), modIndexBus = Bus.control(s, 1),
+carrierFreqBus = Bus.control(s, 1), amp = Bus.control(s, 1), panBus = Bus.control(s, 1), sigOut = Bus.audio(s, 1), carrierOut = Bus.audio(s, 1);
+
+Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 2, \startValue, 0.001, \peakValue, 0.1, \curve, \lin]);
+Synth(\staticControl, [\out, modFreqBus, \dur, dur, \value, 50.midicps * 10]);
+Synth(\percControl, [\out, modIndexBus, \dur, dur, \attackTime, 2, \startValue, 10, \peakValue, 4000, \curve, \lin]);
+Synth(\staticControl, [\out, carrierFreqBus, \dur, dur, \value, 50.midicps]);
+Synth(\staticControl, [\out, panBus, \dur, dur, \value, 0]);
+Synth(\sineOsc, [\dur, dur, \out, modOut, \freqBus, modFreqBus, \ampBus, modIndexBus], addAction:\addToTail);
+Synth(\pmSineOsc, [\dur, dur, \out, sigOut, \freqBus, carrierFreqBus, \modBus, modOut, \ampBus, amp], addAction:\addToTail);
+Synth(\pan, [\in, sigOut, \panBus, panBus, \out, 0, \dur, dur], addAction:\addToTail);
+)
+
+
+(
+
+var w, carrfreqslider, modfreqslider, modindexslider, synth;
+var conversion= 2pi/(s.sampleRate); //needed to avoid phase being adjusted too wildly
+
+w=Window("phase modulation via modulation index", Rect(100, 400, 400, 300));
+w.view.decorator = FlowLayout(w.view.bounds);
+
+synth= {arg carrfreq=440, modfreq=1, modindex=0;
+SinOsc.ar(carrfreq, ( (modfreq * modindex) * conversion * SinOsc.ar(modfreq)), 0.25)
+}.scope;
+
+carrfreqslider= EZSlider(w, 300@50, "carrfreq", ControlSpec(20, 5000, 'exponential', 10, 440), {|ez|  synth.set(\carrfreq, ez.value)});
+w.view.decorator.nextLine;
+
+modfreqslider= EZSlider(w, 300@50, "modfreq", ControlSpec(1, 5000, 'exponential', 1, 1), {|ez|  synth.set(\modfreq, ez.value)});
+w.view.decorator.nextLine;
+
+//bigger range since adjusting phase directly and not frequency
+modindexslider= EZSlider(w, 300@50, "modindex", ControlSpec(0.0, 100, 'linear', 0.01, 0.0), {|ez|  synth.set(\modindex, ez.value)});
+w.front;
+
+)

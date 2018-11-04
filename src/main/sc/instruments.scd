@@ -36,9 +36,9 @@ SynthDef(\xlineControl, {
 }).add;
 
 SynthDef(\percControl, {
-	arg dur = 1, attack = 0.01, curve = -4, startValue = 1, peakValue = 1, out = 0;
+	arg dur = 1, attackTime = 0.01, curve = -4, startValue = 1, peakValue = 1, out = 0;
 	var percEnv;
-	percEnv = EnvGen.kr(Env.perc(attack, dur - attack, 1,curve), doneAction:2).linlin(0, 1, startValue, peakValue);
+	percEnv = EnvGen.kr(Env.perc(attackTime, dur - attackTime, 1,curve), doneAction:2).linlin(0, 1, startValue, peakValue);
 	Out.kr(out, percEnv);
 }).add;
 
@@ -102,6 +102,16 @@ SynthDef(\xfade, {
 	Out.ar(out, result);
 }).add;
 
+SynthDef(\mix, {
+	arg dur = 1, in1 = 0, in2 = 0, out = 0;
+	var sig1, sig2, result;
+	Line.kr(dur:dur, doneAction:2);
+	sig1 = In.ar(in1, 1);
+	sig2 = In.ar(in2, 1);
+	result = Mix.new([sig1, sig2]);
+	Out.ar(out, result);
+}).add;
+
 SynthDef(\moogFilter, {
 	arg dur = 1, in = 0, freqBus = 0, gainBus = 0, out = 0;
 	var input, sig, freq, gain;
@@ -144,19 +154,6 @@ SynthDef(\amModulate, {
 	Out.ar(out, sig);
 }).add;
 
-SynthDef(\fmModulate, {
-	arg dur = 1, carrierFreqBus = 0, modulatorFreqBus = 0, modulatorIndexBus = 0, ampBus = 0, out = 0;
-	var carrierFreq, modulatorFreq, modulatorIndex, sig, amp;
-	Line.kr(dur:dur, doneAction:2);
-	carrierFreq = In.kr(carrierFreqBus, 1);
-	modulatorFreq = In.kr(modulatorFreqBus, 1);
-	modulatorIndex = In.kr(modulatorIndexBus, 1);
-	amp = In.kr(ampBus, 1);
-
-	sig = SinOsc.ar(carrierFreq + (modulatorIndex * modulatorFreq * SinOsc.ar(modulatorFreq)), 0, 0.25);
-	Out.ar(out, sig * amp);
-}).add;
-
 SynthDef(\pmModulate, {
 	arg dur = 1, carrierFreqBus = 0, modulatorFreqBus = 0, modulatorIndexBus = 0, ampBus = 0, out = 0;
 	var carrierFreq, modulatorFreq, modulatorIndex, sig, conversion = 2pi/(s.sampleRate), amp;
@@ -172,30 +169,64 @@ SynthDef(\pmModulate, {
 	Out.ar(out, sig * amp);
 }).add;
 
-
-SynthDef(\fmCarrier, {
-	arg dur = 1, out = 0, freqBus = 0, modBus = 0, partialBus = 0, ampBus = 0;
-	var freq, mod, amp, sig, partial;
+SynthDef(\fmSineModulate, {
+	arg dur = 1, carrierFreqBus = 0, modulatorBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod;
 	Line.kr(dur:dur, doneAction:2);
-	freq = In.kr(freqBus, 1);
-	mod = In.ar(modBus, 1);
 	amp = In.kr(ampBus, 1);
-	partial = In.kr(partialBus, 1);
-	sig = SinOsc.ar((freq * partial) + mod, 0, amp);
+	freq = In.kr(carrierFreqBus, 1);
+	mod = In.ar(modulatorBus, 1);
+
+	sig = SinOsc.ar(freq + mod, mul:amp);
 	Out.ar(out, sig);
 }).add;
 
-
-SynthDef(\fmModulator, {
-	arg dur = 1, out = 0, freqBus = 0, ampBus = 0, partialBus = 0, indexBus = 0;
-	var freq, amp, sig, partial, index;
+SynthDef(\fmPulseModulate, {
+	arg dur = 1, carrierFreqBus = 0, modulatorBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod;
 	Line.kr(dur:dur, doneAction:2);
-	freq = In.kr(freqBus, 1);
 	amp = In.kr(ampBus, 1);
-	partial = In.kr(partialBus, 1);
-	index = In.kr(indexBus, 1);
-	sig = SinOsc.ar(freq * partial, 0, freq) * index;
-	Out.ar(out, sig * amp);
+	freq = In.kr(carrierFreqBus, 1);
+	mod = In.ar(modulatorBus, 1);
+
+	sig = Pulse.ar(freq + mod, mul:amp);
+	Out.ar(out, sig);
+}).add;
+
+SynthDef(\fmSawModulate, {
+	arg dur = 1, carrierFreqBus = 0, modulatorBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod;
+	Line.kr(dur:dur, doneAction:2);
+	amp = In.kr(ampBus, 1);
+	freq = In.kr(carrierFreqBus, 1);
+	mod = In.ar(modulatorBus, 1);
+
+	sig = LFSaw.ar(freq + mod, mul:amp);
+	Out.ar(out, sig);
+}).add;
+
+SynthDef(\fmTriangleModulate, {
+	arg dur = 1, carrierFreqBus = 0, modulatorBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod;
+	Line.kr(dur:dur, doneAction:2);
+	amp = In.kr(ampBus, 1);
+	freq = In.kr(carrierFreqBus, 1);
+	mod = In.ar(modulatorBus, 1);
+
+	sig = LFTri.ar(freq + mod, mul:amp);
+	Out.ar(out, sig);
+}).add;
+
+SynthDef(\pmSineOsc, {
+	arg dur = 1, freqBus = 0, modBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq, mod, conversion= 2pi/(s.sampleRate);
+	Line.kr(dur:dur, doneAction:2);
+	amp = In.kr(ampBus, 1);
+	freq = In.kr(freqBus, 1);
+	mod = In.ar(modBus, 1);
+
+	sig = SinOsc.ar(freq, mod * conversion, mul:amp);
+	Out.ar(out, sig);
 }).add;
 
 SynthDef(\pan, {arg dur = 1, panBus = 0, in = 0, out = 0;
@@ -216,7 +247,7 @@ SynthDef(\pan, {arg dur = 1, panBus = 0, in = 0, out = 0;
 ~simplePatch = {
 	arg pan = 0, dur = 1, freq = 440;
 	var amp = Bus.control(s, 1), panBus = Bus.control(s, 1), freqBus = Bus.control(s, 1), sig = Bus.audio(s, 1);
-	Synth(\percControl, [\out, amp, \dur, dur, \attack, 0.01, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
+	Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 0.01, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
 	Synth(\staticControl, [\out, panBus, \dur, dur, \value, pan]);
 	Synth(\staticControl, [\out, freqBus, \dur, dur, \value, freq]);
 	Synth(\sineOsc, [\out, sig, \dur, dur, \ampBus, amp, \freqBus, freqBus], addAction:\addToTail);
@@ -232,7 +263,7 @@ SynthDef(\pan, {arg dur = 1, panBus = 0, in = 0, out = 0;
 
 (
 var amp = Bus.control(s, 1), panBus = Bus.control(s, 1), freqBus = Bus.control(s, 1), sig = Bus.audio(s, 1), dur = 5;
-Synth(\percControl, [\out, amp, \dur, dur, \attack, 1, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
+Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 1, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
 Synth(\lineControl, [\out, panBus, \dur, dur, \startValue, -1, \endValue, 1]);
 Synth(\staticControl, [\out, freqBus, \dur, dur, \value, 880]);
 Synth(\triangleOsc, [\out, sig, \dur, dur, \ampBus, amp, \freqBus, freqBus], addAction:\addToTail);
@@ -242,7 +273,7 @@ Synth(\pan, [\in, sig, \panBus, panBus, \out, 0, \dur, dur], addAction:\addToTai
 (
 var amp = Bus.control(s, 1), panBus = Bus.control(s, 1), freqBus = Bus.control(s, 1),
 sig1 = Bus.audio(s, 1), sig2 = Bus.audio(s, 1), sig3 = Bus.audio(s, 1), xfade = Bus.control(s, 1), dur = 5;
-Synth(\percControl, [\out, amp, \dur, dur, \attack, 2, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
+Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 2, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
 Synth(\lineControl, [\out, panBus, \dur, dur, \startValue, -1, \endValue, 1]);
 Synth(\staticControl, [\out, freqBus, \dur, dur, \value, 880]);
 Synth(\triangleOsc, [\out, sig1, \dur, dur, \ampBus, amp, \freqBus, freqBus], addAction:\addToTail);
@@ -255,7 +286,7 @@ Synth(\pan, [\in, sig3, \panBus, panBus, \out, 0, \dur, dur], addAction:\addToTa
 (
 var amp = Bus.control(s, 1), panBus = Bus.control(s, 1), freqBus = Bus.control(s, 1), sig = Bus.audio(s, 1), dur = 8,
 filterFreqBus = Bus.control(s, 1), filterGainBus = Bus.control(s, 1), filterOut = Bus.audio(s, 1);
-Synth(\percControl, [\out, amp, \dur, dur, \attack, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
+Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
 Synth(\lineControl, [\out, panBus, \dur, dur, \startValue, -1, \endValue, 1]);
 Synth(\staticControl, [\out, freqBus, \dur, dur, \value, 40]);
 Synth(\lineControl, [\out, filterFreqBus, \dur, dur, \startValue, 40, \endValue, 5000]);
@@ -268,7 +299,7 @@ Synth(\pan, [\in, filterOut, \panBus, panBus, \out, 0, \dur, dur], addAction:\ad
 (
 var amp = Bus.control(s, 1), panBus = Bus.control(s, 1), sig = Bus.audio(s, 1), dur = 8,
 filterFreqBus = Bus.control(s, 1), filterDecayBus = Bus.control(s, 1), filterOut = Bus.audio(s, 1);
-Synth(\percControl, [\out, amp, \dur, dur, \attack, 3, \startValue, 0.001, \peakValue, 0.1, \curve, \lin]);
+Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 3, \startValue, 0.001, \peakValue, 0.1, \curve, \lin]);
 Synth(\lineControl, [\out, panBus, \dur, dur, \startValue, -1, \endValue, 1]);
 Synth(\lineControl, [\out, filterFreqBus, \dur, dur, \startValue, 4000, \endValue, 500]);
 Synth(\staticControl, [\out, filterDecayBus, \dur, dur, \value, 0.1]);
@@ -280,7 +311,7 @@ Synth(\pan, [\in, filterOut, \panBus, panBus, \out, 0, \dur, dur], addAction:\ad
 (
 var amp = Bus.control(s, 1), panBus = Bus.control(s, 1), freqBus = Bus.control(s, 1), sig = Bus.audio(s, 1), dur = 13,
 modFreqBus = Bus.audio(s, 1), modOut = Bus.audio(s, 1);
-Synth(\percControl, [\out, amp, \dur, dur, \attack, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
+Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
 Synth(\lineControl, [\out, panBus, \dur, dur, \startValue, -1, \endValue, 1]);
 Synth(\staticControl, [\out, freqBus, \dur, dur, \value, 50.midicps]);
 Synth(\staticControl, [\out, modFreqBus, \dur, dur, \value, 62.midicps]);
@@ -292,7 +323,7 @@ Synth(\pan, [\in, modOut, \panBus, panBus, \out, 0, \dur, dur], addAction:\addTo
 (
 var amp = Bus.control(s, 1), panBus = Bus.control(s, 1), freqBus = Bus.control(s, 1), sig = Bus.audio(s, 1), dur = 13,
 modFreqBus = Bus.audio(s, 1), modOut = Bus.audio(s, 1);
-Synth(\percControl, [\out, amp, \dur, dur, \attack, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
+Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
 Synth(\lineControl, [\out, panBus, \dur, dur, \startValue, -1, \endValue, 1]);
 Synth(\staticControl, [\out, freqBus, \dur, dur, \value, 55.midicps]);
 Synth(\staticControl, [\out, modFreqBus, \dur, dur, \value, 62.midicps]);
@@ -304,7 +335,7 @@ Synth(\pan, [\in, modOut, \panBus, panBus, \out, 0, \dur, dur], addAction:\addTo
 (
 var amp = Bus.control(s, 1), panBus = Bus.control(s, 1), carrierFreqBus = Bus.control(s, 1), modFreqBus = Bus.control(s, 1),
 modIndexBus = Bus.control(s, 1), dur = 13, modOut = Bus.audio(s, 1);
-Synth(\percControl, [\out, amp, \dur, dur, \attack, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
+Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
 Synth(\lineControl, [\out, panBus, \dur, dur, \startValue, -1, \endValue, 1]);
 Synth(\staticControl, [\out, carrierFreqBus, \dur, dur, \value, 55.midicps]);
 Synth(\staticControl, [\out, modFreqBus, \dur, dur, \value, 62.midicps]);
@@ -316,7 +347,7 @@ Synth(\pan, [\in, modOut, \panBus, panBus, \out, 0, \dur, dur], addAction:\addTo
 (
 var amp = Bus.control(s, 1), panBus = Bus.control(s, 1), carrierFreqBus = Bus.control(s, 1), modFreqBus = Bus.control(s, 1),
 modIndexBus = Bus.control(s, 1), dur = 13, modOut = Bus.audio(s, 1);
-Synth(\percControl, [\out, amp, \dur, dur, \attack, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
+Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
 Synth(\lineControl, [\out, panBus, \dur, dur, \startValue, -1, \endValue, 1]);
 Synth(\staticControl, [\out, carrierFreqBus, \dur, dur, \value, 55.midicps]);
 Synth(\staticControl, [\out, modFreqBus, \dur, dur, \value, 62.midicps]);
@@ -329,7 +360,7 @@ Synth(\pan, [\in, modOut, \panBus, panBus, \out, 0, \dur, dur], addAction:\addTo
 var amp = Bus.control(s, 1), panBus = Bus.control(s, 1), carrierFreqBus = Bus.control(s, 1), modFreqBus = Bus.control(s, 1),
 modIndexBus = Bus.control(s, 1), dur = 13, modOut = Bus.audio(s, 1), partialBus = Bus.control(s, 1),
 indexBus = Bus.control(s, 1), sigOut = Bus.audio(s, 1);
-Synth(\percControl, [\out, amp, \dur, dur, \attack, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
+Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
 Synth(\lineControl, [\out, panBus, \dur, dur, \startValue, -1, \endValue, 1]);
 Synth(\staticControl, [\out, carrierFreqBus, \dur, dur, \value, 55.midicps]);
 Synth(\staticControl, [\out, modFreqBus, \dur, dur, \value, 62.midicps]);
@@ -347,7 +378,7 @@ Synth(\pan, [\in, sigOut, \panBus, panBus, \out, 0, \dur, dur], addAction:\addTo
 var amp = Bus.control(s, 1), panBus = Bus.control(s, 1), carrierFreqBus = Bus.control(s, 1), modFreqBus = Bus.control(s, 1),
 modFreqBus2 = Bus.control(s, 1), dur = 13, modOut = Bus.audio(s, 1), partialBus = Bus.control(s, 1),
 indexBus = Bus.control(s, 1), indexBus2 = Bus.control(s, 1), sigOut = Bus.audio(s, 1);
-Synth(\percControl, [\out, amp, \dur, dur, \attack, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
+Synth(\percControl, [\out, amp, \dur, dur, \attackTime, 3, \startValue, 0.001, \peakValue, 1, \curve, \lin]);
 Synth(\lineControl, [\out, panBus, \dur, dur, \startValue, -1, \endValue, 1]);
 Synth(\staticControl, [\out, carrierFreqBus, \dur, dur, \value, 55.midicps]);
 Synth(\staticControl, [\out, modFreqBus, \dur, dur, \value, 62.midicps]);
@@ -370,3 +401,10 @@ s.reboot;
 
 // FM Synthesis algorithms
 // "https://www.youtube.com/watch?v=Y1xPT5D7Oc0"
+
+Bus.control(s, 1).index
+Bus.audio(s, 1).index
+
+
+// Filter modulation with amModulate?
+// https://www.soundonsound.com/techniques/amplitude-modulation
