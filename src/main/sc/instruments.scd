@@ -38,8 +38,28 @@ SynthDef(\xlineControl, {
 SynthDef(\percControl, {
 	arg dur = 1, attackTime = 0.01, curve = -4, startValue = 1, peakValue = 1, out = 0;
 	var percEnv;
-	percEnv = EnvGen.kr(Env.perc(attackTime, dur - attackTime, 1,curve), doneAction:2).linlin(0, 1, startValue, peakValue);
+	percEnv = EnvGen.kr(
+		Env.perc(attackTime, dur - attackTime, 1,curve), doneAction:2).linlin(0, 1, startValue, peakValue);
 	Out.kr(out, percEnv);
+}).add;
+
+SynthDef(\sineControl, {
+	arg dur = 1, freqBus = 0, minValue = 1, maxValue = 1, out = 0;
+	var freq, sig;
+	Line.kr(dur:dur, doneAction:2);
+	freq = In.kr(freqBus, 1);
+	sig = SinOsc.kr(freq).linlin(-1, 1, minValue, maxValue);
+	Out.kr(out, sig);
+}).add;
+
+SynthDef(\controlMix, {
+	arg dur = 1, in1 = 0, in2 = 0, out = 0;
+	var sig1, sig2, result;
+	Line.kr(dur:dur, doneAction:2);
+	sig1 = In.kr(in1, 1);
+	sig2 = In.kr(in2, 1);
+	result = Mix.new([sig1, sig2]);
+	Out.kr(out, result);
 }).add;
 
 SynthDef(\whiteNoiseOsc, {

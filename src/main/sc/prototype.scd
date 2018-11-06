@@ -964,3 +964,8 @@ modindexslider= EZSlider(w, 300@50, "modindex", ControlSpec(0.0, 100, 'linear', 
 w.front;
 
 )
+
+
+(
+{SinOsc.ar(0.5).linlin(-1, 1, 300, 3000)}.plot(4);
+)

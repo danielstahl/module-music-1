@@ -205,7 +205,7 @@ object Test {
     player.startPlay()
     setupNodes(player)
 
-    val modIndex = percControl(300f, 3000f, 5f, Right(Instrument.LINEAR))
+    val modIndex = sineControl(staticControl(0.2f), 300, 3000)
 
     val graph1 = modIndex.buildGraph(0, 10, modIndex.graph(Seq()))
     player.sendNew(absoluteTimeToMillis(0), graph1)
@@ -239,12 +239,49 @@ object Test {
       play(i + pattern(6), 'c2, dur, 0.5f)
       play(i + pattern(7), 'e2, dur, 0.5f)
     })
+  }
 
+  def test12(): Unit = {
+    implicit val player: MusicPlayer = MusicPlayer()
+    player.startPlay()
+    setupNodes(player)
 
+    val amp = percControl(0.01f, 1.0f, 1f, Right(Instrument.LINEAR))
+    val freq = sineControl(lineControl(0.2f, 0.1f), 500, 400)
+    val triangle = sineOsc(amp, freq).addAction(TAIL_ACTION)
+    val panValue = lineControl(-0.5f, 0.5f)
+    val pan = panning(triangle, panValue)
+      .addAction(TAIL_ACTION)
+
+    pan.getOutputBus.staticBus(0)
+
+    val graph = pan.buildGraph(0f, 13f, pan.graph(Seq()))
+    player.sendNew(absoluteTimeToMillis(0f), graph)
+  }
+
+  def test13(): Unit = {
+    implicit val player: MusicPlayer = MusicPlayer()
+    player.startPlay()
+    setupNodes(player)
+
+    val amp = percControl(0.01f, 1.0f, 1f, Right(Instrument.LINEAR))
+    val freq = controlMix(
+      lineControl(200, 500),
+      sineControl(lineControl(5f, 6f), 10, 20))
+
+    val triangle = sineOsc(amp, freq).addAction(TAIL_ACTION)
+    val panValue = lineControl(-0.5f, 0.5f)
+    val pan = panning(triangle, panValue)
+      .addAction(TAIL_ACTION)
+
+    pan.getOutputBus.staticBus(0)
+
+    val graph = pan.buildGraph(0f, 13f, pan.graph(Seq()))
+    player.sendNew(absoluteTimeToMillis(0f), graph)
   }
 
   def main(args: Array[String]): Unit = {
-    test11()
+    test13()
   }
 
 

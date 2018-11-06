@@ -20,6 +20,15 @@ object Instruments {
   def lineControl(startValue: Float, endValue: Float): LineControl =
     new LineControl().control(startValue, endValue)
 
+  def xlineControl(startValue: Float, endValue: Float): XLineControl =
+    new XLineControl().control(startValue, endValue)
+
+  def sineControl(freqBus: ControlInstrument, minValue: Float, maxValue: Float): SineControl =
+    new SineControl().control(freqBus, minValue, maxValue)
+
+  def controlMix(in1Bus: ControlInstrument, in2Bus: ControlInstrument): ControlMix =
+    new ControlMix().mix(in1Bus, in2Bus)
+
   def panning(inBus: AudioInstrument, panBus: ControlInstrument): Panning =
     new Panning().pan(inBus, panBus)
 
@@ -143,6 +152,31 @@ object Instruments {
         "endValue", endValue)
   }
 
+  class XLineControl extends ControlInstrument {
+    type SelfType = XLineControl
+
+    def self(): SelfType = this
+
+    val instrumentName: String = "xlineControl"
+
+    var startValue: jl.Float = _
+    var endValue: jl.Float = _
+
+    def control(startValue: Float, endValue: Float): SelfType = {
+      this.startValue = buildFloat(startValue)
+      this.endValue = buildFloat(endValue)
+      self()
+    }
+
+    override def graph(parent: Seq[ModularInstrument]): Seq[ModularInstrument] =
+      prependToGraph(parent)
+
+    override def internalBuild(startTime: Float, duration: Float): Seq[Object] =
+      Seq(
+        "startValue", startValue,
+        "endValue", endValue)
+  }
+
   class StaticControl extends ControlInstrument {
     type SelfType = StaticControl
 
@@ -161,8 +195,67 @@ object Instruments {
       prependToGraph(parent)
 
     override def internalBuild(startTime: Float, duration: Float): Seq[Object] =
+      Seq("value", value)
+  }
+
+  class SineControl extends ControlInstrument {
+    type SelfType = SineControl
+
+    def self(): SelfType = this
+
+    val instrumentName: String = "sineControl"
+
+    var freqBus: ControlInstrument = _
+    var minValue: jl.Float = _
+    var maxValue: jl.Float = _
+
+    def control(freqBus: ControlInstrument, minValue: Float, maxValue: Float): SelfType = {
+      this.freqBus = freqBus
+      this.minValue = buildFloat(minValue)
+      this.maxValue = buildFloat(maxValue)
+      self()
+    }
+
+    override def graph(parent: Seq[ModularInstrument]): Seq[ModularInstrument] =
+      appendToGraph(freqBus.graph(parent))
+
+    override def internalBuild(startTime: Float, duration: Float): Seq[Object] =
       Seq(
-        "value", value)
+        "freqBus", buildInteger(freqBus.getOutputBus.dynamicBus(startTime, freqBus.optionalDur.getOrElse(duration))),
+        "minValue", minValue,
+        "maxValue", maxValue)
+  }
+
+  class ControlMix extends ControlInstrument {
+    type SelfType = ControlMix
+
+    def self(): SelfType = this
+
+    val instrumentName: String = "controlMix"
+
+    var in1Bus: ControlInstrument = _
+    var in2Bus: ControlInstrument = _
+
+    def mix(in1Bus: ControlInstrument, in2Bus: ControlInstrument): SelfType = {
+      this.in1Bus = in1Bus
+      this.in2Bus= in2Bus
+      self()
+    }
+
+    override def graph(parent: Seq[ModularInstrument]): Seq[ModularInstrument] =
+      appendToGraph(in1Bus.graph(in2Bus.graph(parent)))
+
+    override def internalBuild(startTime: Float, duration: Float): Seq[Object] = {
+      val durationFallback: jl.Float = buildFloat(duration)
+
+      Seq(
+        "in1", buildInteger(
+          in1Bus.getOutputBus.dynamicBus(startTime,
+            in1Bus.optionalDur.getOrElse(durationFallback))),
+        "in2", buildInteger(
+          in2Bus.getOutputBus.dynamicBus(startTime,
+            in2Bus.optionalDur.getOrElse(durationFallback))))
+    }
   }
 
   class Panning extends AudioInstrument {
