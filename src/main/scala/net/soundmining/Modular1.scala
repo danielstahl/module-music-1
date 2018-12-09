@@ -37,107 +37,9 @@ object Modular1 {
     }
   }
 
-  // (130.8128,0),
-  // (196.21921,1),
-  // (261.6256,2),
-  // (327.032,3),
-  // (392.43842,4),
-  // (457.84482,5),
-  // (523.2512,6),
-  // (588.6576,7),
-  // (654.064,8),
-  // (719.4704,9),
-  // (784.87683,10),
-  // (850.28326,11),
-  // (915.68964,12),
-  // (981.096,13),
-  // (1046.5024,14),
-  // (1111.9089,15),
-  // (1177.3152,16),
-  // (1242.7217,17),
-  // (1308.1279,18),
-  // (1373.5344,19),
-  // (1438.9409,20),
-  def chord1(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
-    val chord = (majorSpectrum(3), majorSpectrum(4))
-    val (note1, note2) = chord
-
+  def exposition(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
     val time = (majorSpectrum(3) / 1000f, majorSpectrum(4) / 1000f)
     val (time1, time2) = time
-
-    println(s"chord $chord time $time")
-
-    val rythm1 = absolute(startTime, Seq(time1 * 13, time1 * 13))
-    val duration1 = Seq(time1 * 34, time1 * 34)
-    val attack1 = Seq(time1 * 21, time1 * 13)
-
-    play(rythm1.head, duration1.head, ringTriangle(1, attack1.head, note1, note2), (-0.7f, 0.7f))
-    play(rythm1(1), duration1(1), ringFm(0.8f, note1, note2,  note2, attack1(1)), (0.5f, 0.9f))
-
-    val rythm2 = absolute(startTime, Seq(time2 * 8, time2 * 21, time2 * 21, time2 * 21))
-    val duration2 = Seq(time2 * 34, time2 * 13, time2 * 21)
-    val attack2 = Seq(time2 * 13, time2 * 8, time2 * 13)
-
-    play(rythm2.head, duration2.head, sine( 0.1f, attack2.head, note1), (-0.1f, -0.3f))
-    play(rythm2.head, duration2.head, pulse( 0.05f, attack2.head, note1), (-0.5f, -0.2f))
-
-    play(rythm2(1), duration2(1), sine( 0.1f, attack2(1), note2), (0.1f, 0.3f))
-    play(rythm2(1), duration2(1), pulse( 0.05f, attack2(1), note2), (0.5f, 0.2f))
-
-    play(rythm2(2), duration2(2), pulseTriangleFm(0.4f, attack2(2), note2,  note1), (-0.2f, -0.6f))
-
-    chord2(rythm2(3))
-  }
-
-  /*
-  * We should try to make pulses also. Alternate between pulses and long chords.
-  * Think Donna Summer I feel love. Delay? Long notes with Moog Filter.
-  *
-  * We could set up different effects that have long durations. Delays,
-  * flanger, moog filters etc. Then we could send different tones via
-  * different effects. E.g one note via delay and flanger, another
-  * note via moog filter and reverb. Also pan could be treated the same.
-  * */
-  def pulse1(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
-    val chord = (majorSpectrum(3), majorSpectrum(4))
-    val (note1, note2) = chord
-
-    val time = (majorSpectrum(3) / 1000f, majorSpectrum(4) / 1000f)
-    val (time1, time2) = time
-
-    println(s"chord $chord time $time")
-
-    val rythm1 = absolute(startTime, Seq(time1 * 2, time1 * 2, time1 * 2, time1 * 2))
-    val duration1 = Seq(time1, time1, time1, time1)
-
-    val delayAudioBus = staticAudioBus()
-    val delay = monoDelay(delayAudioBus, delayTime = time2 / 2, decayTime = time2 * 13)
-      .addAction(TAIL_ACTION)
-      .nodeId(EFFECT)
-
-    //val pan = panning(delay, lineControl(-0.5f, 0.5f))
-    val pan = panning(delay, sineControl(staticControl(time2 / 2), -0.5f, 0.5f))
-      .addAction(TAIL_ACTION)
-      .nodeId(EFFECT)
-
-    pan.getOutputBus.staticBus(0)
-    val graph = pan.buildGraph(startTime, 20, pan.graph(Seq()))
-    player.sendNew(absoluteTimeToMillis(startTime), graph)
-
-    play(rythm1.head, duration1.head, shortFm( 0.2f, 0.01f, note2, note1, delayAudioBus))
-    play(rythm1(1), duration1(1), shortFm( 0.4f, 0.01f, note2, note1, delayAudioBus))
-    play(rythm1(2), duration1(2), shortFm( 0.6f, 0.01f, note2, note1, delayAudioBus))
-    play(rythm1(3), duration1(3), shortFm( 0.8f, 0.01f, note2, note1, delayAudioBus))
-  }
-
-  def mainTheme1(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
-    val chord = (majorSpectrum(3), majorSpectrum(4))
-    val (note1, note2) = chord
-
-    val time = (majorSpectrum(3) / 1000f, majorSpectrum(4) / 1000f)
-    val (time1, time2) = time
-
-    println(s"chord $chord time $time")
 
     val pulseStartTime = time1 * 13
     val pulseDuration = time2 * 13 * 13 * 13
@@ -154,145 +56,119 @@ object Modular1 {
     val graph = pan.buildGraph(pulseStartTime, pulseDuration, pan.graph(Seq()))
     player.sendNew(absoluteTimeToMillis(pulseStartTime), graph)
 
-    play(pulseStartTime, 0.1f, shortFm( 0.7f, 0.01f, note2, note1, delayAudioBus))
-
-    val rythm1 = absolute(startTime, Seq(
+    val rythm = absolute(startTime, Seq(
+      // Main theme
       time1 * 13, time1 * 13 + time2 * 5,
       time1 * 13, time1 * 13 + time2 * 5,
       time1 * 13, time1 * 13 + time2 * 5,
-      time1 * 13, time1 * 13 + time2 * 5, time1 * 13))
-    val duration1 = Seq(
+      time1 * 13, time1 * 13 + time2 * 5,
+      // Second theme
+      time2 * 8, time2 * 8, time2 * 8 + time2 * 8,
+      time2 * 8, time2 * 8, time2 * 8 + time2 * 8,
+      time2 * 8, time2 * 8, time2 * 8 + time2 * 8,
+      // Main theme
+      time1 * 13, time1 * 13 + time2 * 5,
+      time1 * 13, time1 * 13 + time2 * 5,
+      time1 * 13, time1 * 13 + time2 * 5
+      ))
+    val duration = Seq(
+      // Main theme
       time1 * 13, time1 * 13,
       time1 * 13, time1 * 13,
       time1 * 13, time1 * 13,
-      time1 * 13, time1 * 13)
-    val attack1 = Seq(
+      time1 * 13, time1 * 13,
+      // Second theme
+      time2 * 8, time2 * 8, time2 * 8,
+      time2 * 8, time2 * 8, time2 * 8,
+      time2 * 8, time2 * 8, time2 * 8,
+      // Main theme
+      time1 * 13, time1 * 13,
+      time1 * 13, time1 * 13,
+      time1 * 13, time1 * 13
+    )
+    val attack = Seq(
+      // Main theme
       time1 * 5, time1 * 8,
       time1 * 5, time1 * 8,
       time1 * 5, time1 * 8,
-      time1 * 5, time1 * 8)
+      time1 * 5, time1 * 8,
+      // Second theme
+      time2 * 4, time2 * 4, time2 * 4,
+      time2 * 4, time2 * 4, time2 * 4,
+      time2 * 4, time2 * 4, time2 * 4,
+      // Main theme
+      time1 * 5, time1 * 8,
+      time1 * 5, time1 * 8,
+      time1 * 5, time1 * 8
+    )
 
-    println(rythm1)
+    // Main theme
+    val chord1 = (majorSpectrum(3), majorSpectrum(4))
 
-    play(rythm1.head, duration1.head, simpleFm(0.7f, attack1.head, note2, note1, (0, 130), time1 * 8), (-0.7f, 0.7f))
-    play(rythm1(1), duration1(1), simpleFm(0.5f, attack1(1), note1, note2, (0, 130), time1 * 5), (0.7f, -0.7f))
+    play(rythm.head, duration.head, simpleFm(0.7f, attack.head, chord1._2, chord1._1, (0, 130), time1 * 8), (-0.7f, 0.7f))
+    play(rythm(1), duration(1), simpleFm(0.5f, attack(1), chord1._1, chord1._2, (0, 130), time1 * 5), (0.7f, -0.7f))
+
+    play(pulseStartTime, 0.1f, shortFm( 0.7f, 0.01f, chord1._2, chord1._1, delayAudioBus))
 
     val chord2 = (majorSpectrum(5), majorSpectrum(7))
 
-    play(rythm1(2), duration1(2), simpleFm(0.7f, attack1(2), chord2._2, chord2._1, (0, 130), time1 * 8), (0.7f, -0.7f))
-    play(rythm1(3), duration1(3), simpleFm(0.5f, attack1(3), chord2._1, chord2._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
+    play(rythm(2), duration(2), simpleFm(0.7f, attack(2), chord2._2, chord2._1, (0, 130), time1 * 8), (0.7f, -0.7f))
+    play(rythm(3), duration(3), simpleFm(0.5f, attack(3), chord2._1, chord2._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
 
-    play(rythm1(3), 0.1f, shortFm( 0.7f, 0.01f, chord2._2, chord2._1, delayAudioBus))
+    play(rythm(3), 0.1f, shortFm( 0.7f, 0.01f, chord2._2, chord2._1, delayAudioBus))
 
     val chord3 = (majorSpectrum(6), majorSpectrum(9))
 
-    play(rythm1(4), duration1(4), simpleFm(0.7f, attack1(4), chord3._2, chord3._1, (0, 130), time1 * 8), (0.7f, -0.7f))
-    play(rythm1(5), duration1(5), simpleFm(0.5f, attack1(5), chord3._1, chord3._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
+    play(rythm(4), duration(4), simpleFm(0.7f, attack(4), chord3._2, chord3._1, (0, 130), time1 * 8), (0.7f, -0.7f))
+    play(rythm(5), duration(5), simpleFm(0.5f, attack(5), chord3._1, chord3._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
 
-    play(rythm1(5), 0.1f, shortFm( 0.7f, 0.01f, chord3._2, chord3._1, delayAudioBus))
+    play(rythm(5), 0.1f, shortFm( 0.7f, 0.01f, chord3._2, chord3._1, delayAudioBus))
 
     val chord4 = (majorSpectrum(10), majorSpectrum(13))
 
-    play(rythm1(6), duration1(6), simpleFm(0.7f, attack1(6), chord4._2, chord4._1, (0, 130), time1 * 8), (0.7f, -0.7f))
-    play(rythm1(7), duration1(7), simpleFm(0.5f, attack1(7), chord4._1, chord4._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
+    play(rythm(6), duration(6), simpleFm(0.7f, attack(6), chord4._2, chord4._1, (0, 130), time1 * 8), (0.7f, -0.7f))
+    play(rythm(7), duration(7), simpleFm(0.5f, attack(7), chord4._1, chord4._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
 
-    play(rythm1(7), 0.1f, shortFm( 0.7f, 0.01f, chord4._2, chord4._1, delayAudioBus))
+    play(rythm(7), 0.1f, shortFm( 0.7f, 0.01f, chord4._2, chord4._1, delayAudioBus))
 
-    // 85.8132, 3.1395073
+    // Second theme
+    val subChord1 = (majorSpectrum(11), majorSpectrum(12))
 
-    //10 6  8 5
+    play(rythm(8), duration(8), simpleFm(0.4f, attack(8), subChord1._2, subChord1._1, (500, 1500), time2 * 4), (0.2f, -0.2f))
+    play(rythm(9), duration(9), simpleFm(0.7f, attack(9), subChord1._1, subChord1._2, (500, 1500), time2 * 4), (0.2f, -0.2f))
+    play(rythm(10), duration(10), simpleFm(0.3f, attack(10), subChord1._2, subChord1._1, (500, 1500), time2 * 4), (0.2f, -0.2f))
 
-    val rythm2 = absolute(85.8132f, Seq(
-      time1 * 13, time1 * 13 + time2 * 5,
-      time1 * 13, time1 * 13 + time2 * 5,
-      time1 * 13, time1 * 13 + time2 * 5))
-    val duration2 = Seq(
-      time1 * 13, time1 * 13,
-      time1 * 13, time1 * 13,
-      time1 * 13, time1 * 13)
-    val attack2 = Seq(
-      time1 * 5, time1 * 8,
-      time1 * 5, time1 * 8,
-      time1 * 5, time1 * 8)
+    val subChord2 = (majorSpectrum(14), majorSpectrum(8))
 
+    play(rythm(11), duration(11), simpleFm(0.4f, attack(11), subChord2._2, subChord2._1, (500, 1500), time2 * 4), (0.2f, -0.2f))
+    play(rythm(12), duration(12), simpleFm(0.7f, attack(12), subChord2._1, subChord2._2, (500, 1500), time2 * 4), (0.2f, -0.2f))
+    play(rythm(13), duration(13), simpleFm(0.3f, attack(13), subChord2._2, subChord2._1, (500, 1500), time2 * 4), (0.2f, -0.2f))
+
+    val subChord3 = (majorSpectrum(12), majorSpectrum(7))
+
+    play(rythm(14), duration(14), simpleFm(0.4f, attack(14), subChord3._2, subChord3._1, (500, 1500), time2 * 4), (0.2f, -0.2f))
+    play(rythm(15), duration(15), simpleFm(0.7f, attack(15), subChord3._1, subChord3._2, (500, 1500), time2 * 4), (0.2f, -0.2f))
+    play(rythm(16), duration(16), simpleFm(0.3f, attack(16), subChord3._2, subChord3._1, (500, 1500), time2 * 4), (0.2f, -0.2f))
+
+    // Main theme
     val chord5 = (majorSpectrum(10), majorSpectrum(6))
 
-    play(rythm2.head, duration2.head, simpleFm(0.7f, attack2.head, chord5._2, chord5._1, (0, 130), time1 * 8), (0.7f, -0.7f))
-    play(rythm2(1), duration2(1), simpleFm(0.5f, attack2(1), chord5._1, chord5._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
+    play(rythm(17), duration(17), simpleFm(0.7f, attack(17), chord5._2, chord5._1, (0, 130), time1 * 8), (0.7f, -0.7f))
+    play(rythm(18), duration(18), simpleFm(0.5f, attack(18), chord5._1, chord5._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
 
-    play(rythm2(1), 0.1f, shortFm( 0.7f, 0.01f, chord5._2, chord5._1, delayAudioBus))
+    play(rythm(18), 0.1f, shortFm( 0.7f, 0.01f, chord5._2, chord5._1, delayAudioBus))
 
     val chord6 = (majorSpectrum(8), majorSpectrum(5))
 
-    play(rythm2(2), duration2(2), simpleFm(0.7f, attack2(2), chord6._2, chord6._1, (0, 130), time1 * 8), (0.7f, -0.7f))
-    play(rythm2(3), duration2(3), simpleFm(0.5f, attack2(3), chord6._1, chord6._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
+    play(rythm(19), duration(19), simpleFm(0.7f, attack(19), chord6._2, chord6._1, (0, 130), time1 * 8), (0.7f, -0.7f))
+    play(rythm(20), duration(20), simpleFm(0.5f, attack(20), chord6._1, chord6._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
 
-    play(rythm2(3), 0.1f, shortFm( 0.7f, 0.01f, chord6._2, chord6._1, delayAudioBus))
+    play(rythm(20), 0.1f, shortFm( 0.7f, 0.01f, chord6._2, chord6._1, delayAudioBus))
 
-    play(rythm2(4), duration2(4), simpleFm(0.7f, attack2(4), note2, note1, (0, 130), time1 * 8), (0.7f, -0.7f))
-    play(rythm2(5), duration2(5), simpleFm(0.5f, attack2(5), note1, note2, (0, 130), time1 * 5), (-0.7f, 0.7f))
+    play(rythm(21), duration(21), simpleFm(0.7f, attack(21), chord1._2, chord1._1, (0, 130), time1 * 8), (0.7f, -0.7f))
+    play(rythm(22), duration(22), simpleFm(0.5f, attack(22), chord1._1, chord1._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
 
-    play(rythm2(5), 0.1f, shortFm( 0.7f, 0.01f, note2, note1, delayAudioBus))
-
-  }
-
-  def subTheme1(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
-    val chord = (majorSpectrum(11), majorSpectrum(12))
-    val (note1, note2) = chord
-
-    val time = (majorSpectrum(3) / 1000f, majorSpectrum(4) / 1000f)
-    val (time1, time2) = time
-
-    println(s"chord $chord time $time")
-
-    val rythm1 = absolute(startTime, Seq(
-      time2 * 8, time2 * 8, time2 * 8 + time2 * 8,
-      time2 * 8, time2 * 8, time2 * 8 + time2 * 8,
-      time2 * 8, time2 * 8, time2 * 8 + time2 * 8,
-      time2 * 8, time2 * 8, time2 * 8 + time2 * 8))
-    val duration1 = Seq(
-      time2 * 8, time2 * 8, time2 * 8,
-      time2 * 8, time2 * 8, time2 * 8,
-      time2 * 8, time2 * 8, time2 * 8,
-      time2 * 8, time2 * 8, time2 * 8)
-    val attack1 = Seq(
-      time2 * 4, time2 * 4, time2 * 4,
-      time2 * 4, time2 * 4, time2 * 4,
-      time2 * 4, time2 * 4, time2 * 4,
-      time2 * 4, time2 * 4, time2 * 4)
-
-    println(s"Subtheme times $rythm1 durations $duration1")
-
-    play(rythm1.head, duration1.head, simpleFm(0.4f, attack1.head, note2, note1, (500, 1500), time2 * 4), (0.2f, -0.2f))
-    play(rythm1(1), duration1(1), simpleFm(0.7f, attack1(1), note1, note2, (500, 1500), time2 * 4), (0.2f, -0.2f))
-    play(rythm1(2), duration1(2), simpleFm(0.3f, attack1(2), note2, note1, (500, 1500), time2 * 4), (0.2f, -0.2f))
-
-    val chord2 = (majorSpectrum(14), majorSpectrum(8))
-
-    play(rythm1(3), duration1(3), simpleFm(0.4f, attack1(3), chord2._2, chord2._1, (500, 1500), time2 * 4), (0.2f, -0.2f))
-    play(rythm1(4), duration1(4), simpleFm(0.7f, attack1(4), chord2._1, chord2._2, (500, 1500), time2 * 4), (0.2f, -0.2f))
-    play(rythm1(5), duration1(5), simpleFm(0.3f, attack1(5), chord2._2, chord2._1, (500, 1500), time2 * 4), (0.2f, -0.2f))
-
-    val chord3 = (majorSpectrum(12), majorSpectrum(7))
-
-    play(rythm1(6), duration1(6), simpleFm(0.4f, attack1(3), chord3._2, chord3._1, (500, 1500), time2 * 4), (0.2f, -0.2f))
-    play(rythm1(7), duration1(7), simpleFm(0.7f, attack1(4), chord3._1, chord3._2, (500, 1500), time2 * 4), (0.2f, -0.2f))
-    play(rythm1(8), duration1(8), simpleFm(0.3f, attack1(5), chord3._2, chord3._1, (500, 1500), time2 * 4), (0.2f, -0.2f))
-  }
-
-  def chord2(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
-    val chord = (majorSpectrum(5), majorSpectrum(7))
-    val (note1, note2) = chord
-
-    val time = (majorSpectrum(5) / 1000f, majorSpectrum(7) / 1000f)
-    val (time1, time2) = time
-
-    val rythm1 = absolute(startTime, Seq(time1 * 5, time1 * 5))
-    val duration1 = Seq(time1 * 13, time1 * 21)
-    val attack1 = Seq(time1 * 5, time1 * 8)
-
-    play(rythm1.head, duration1.head, simpleFm(0.5f, attack1.head, note2, note1, (300, 1000), attack1.head), (-0.7f, 0.7f))
-    play(rythm1(1), duration1(1), pulseRing(1f, attack1(1), note1, note2), (0.7f, -0.7f))
+    play(rythm(22), 0.1f, shortFm( 0.7f, 0.01f, chord1._2, chord1._1, delayAudioBus))
   }
 
   def sine(ampValue: Float, attackTime: Float, freq: Float): SineOsc = {
@@ -388,13 +264,7 @@ object Modular1 {
     println("mirrored spectrum")
     println(mirroredSpectrum.map(hertzToNote).zipWithIndex.mkString(", "))
 
-    //playChordProgression()
-    //chord1(0f)
-
-    //chord1(0f)
-    //pulse1(0f)
-    mainTheme1(0f)
-    subTheme1(41.860096f)
+    exposition(0f)
   }
 
 }
