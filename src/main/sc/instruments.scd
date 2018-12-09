@@ -39,7 +39,7 @@ SynthDef(\percControl, {
 	arg dur = 1, attackTime = 0.01, curve = -4, startValue = 1, peakValue = 1, out = 0;
 	var percEnv;
 	percEnv = EnvGen.kr(
-		Env.perc(attackTime, dur - attackTime, 1,curve), doneAction:2).linlin(0, 1, startValue, peakValue);
+		Env.perc(attackTime, dur - attackTime, 1, curve), doneAction:2).linlin(0, 1, startValue, peakValue);
 	Out.kr(out, percEnv);
 }).add;
 
@@ -256,6 +256,26 @@ SynthDef(\pan, {arg dur = 1, panBus = 0, in = 0, out = 0;
 
 	input = In.ar(in, 1);
 	Out.ar(out, LinPan2.ar(input, pan));
+}).add;
+
+SynthDef(\monoDelay, {
+	arg dur = 1, in = 0, out = 0, delaytime = 0.2, decaytime = 1;
+	var input, delaySig;
+	Line.kr(dur:dur, doneAction:2);
+	input = In.ar(in, 1);
+	delaySig = CombL.ar(input, delaytime, delaytime, decaytime);
+
+	Out.ar(out, delaySig + input);
+}).add;
+
+SynthDef(\stereoDelay, {
+	arg dur = 1, in = 0, out = 0, delaytime = 0.2, decaytime = 1;
+	var input, delaySig;
+	Line.kr(dur:dur, doneAction:2);
+	input = In.ar(in, 2);
+	delaySig = CombL.ar(input, delaytime, delaytime, decaytime);
+
+	Out.ar(out, delaySig + input);
 }).add;
 
 "Added Instruments".postln;

@@ -4,9 +4,12 @@ package net.soundmining
 import java.{lang => jl}
 
 import net.soundmining.Instrument.{EnvCurve, buildFloat, buildInteger}
-import net.soundmining.ModularInstrument.{AudioInstrument, ControlInstrument, ModularInstrument}
+import net.soundmining.ModularInstrument.{AudioBus, AudioInstrument, ControlInstrument, ModularInstrument, StaticAudioBusInstrument}
 
 object Instruments {
+
+  def staticAudioBus(): StaticAudioBusInstrument =
+    new StaticAudioBusInstrument()
 
   def staticControl(value: Float): StaticControl =
     new StaticControl().control(value)
@@ -31,6 +34,12 @@ object Instruments {
 
   def panning(inBus: AudioInstrument, panBus: ControlInstrument): Panning =
     new Panning().pan(inBus, panBus)
+
+  def monoDelay(inBus: AudioInstrument, delayTime: Float, decayTime: Float): MonoDelay =
+    new MonoDelay().delay(inBus, delayTime, decayTime)
+
+  def stereoDelay(inBus: AudioInstrument, delayTime: Float, decayTime: Float): StereoDelay =
+    new StereoDelay().delay(inBus, delayTime, decayTime)
 
   def xfade(in1Bus: AudioInstrument, in2Bus: AudioInstrument, xfadeBus: ControlInstrument): XFade =
     new XFade().xfade(in1Bus: AudioInstrument, in2Bus: AudioInstrument, xfadeBus: ControlInstrument)
@@ -221,7 +230,7 @@ object Instruments {
 
     override def internalBuild(startTime: Float, duration: Float): Seq[Object] =
       Seq(
-        "freqBus", buildInteger(freqBus.getOutputBus.dynamicBus(startTime, freqBus.optionalDur.getOrElse(duration))),
+        "freqBus", buildInteger(freqBus.getOutputBus.dynamicBus(startTime, startTime + freqBus.optionalDur.getOrElse(duration))),
         "minValue", minValue,
         "maxValue", maxValue)
   }
@@ -251,10 +260,10 @@ object Instruments {
       Seq(
         "in1", buildInteger(
           in1Bus.getOutputBus.dynamicBus(startTime,
-            in1Bus.optionalDur.getOrElse(durationFallback))),
+            startTime + in1Bus.optionalDur.getOrElse(duration))),
         "in2", buildInteger(
           in2Bus.getOutputBus.dynamicBus(startTime,
-            in2Bus.optionalDur.getOrElse(durationFallback))))
+            startTime + in2Bus.optionalDur.getOrElse(duration))))
     }
   }
 
@@ -283,11 +292,61 @@ object Instruments {
       Seq(
         "in", buildInteger(
           inBus.getOutputBus.dynamicBus(startTime,
-            inBus.optionalDur.getOrElse(durationFallback))),
+            startTime + inBus.optionalDur.getOrElse(duration))),
         "panBus", buildInteger(
           panBus.getOutputBus.dynamicBus(startTime,
-            panBus.optionalDur.getOrElse(durationFallback))))
+            startTime + panBus.optionalDur.getOrElse(duration))))
     }
+  }
+
+  abstract class Delay extends AudioInstrument {
+    var inBus: AudioInstrument = _
+    var delaytime: jl.Float = _
+    var decaytime: jl.Float = _
+    val nrOfChannels: Int
+
+    def delay(inBus: AudioInstrument, delayTime: Float, decayTime: Float): SelfType = {
+      this.inBus = inBus
+      this.delaytime = buildFloat(delayTime)
+      this.decaytime = buildFloat(decayTime)
+      self()
+    }
+
+    override def graph(parent: Seq[ModularInstrument]): Seq[ModularInstrument] =
+      appendToGraph(inBus.graph(parent))
+
+    def getInputBus(startTime: Float, durationFallback: Float): Int =
+      this.inBus.getOutputBus.dynamicBus(startTime,
+        startTime + inBus.optionalDur.getOrElse(durationFallback))
+
+
+    override def internalBuild(startTime: Float, duration: Float): Seq[Object] = {
+      val durationFallback: jl.Float = buildFloat(duration)
+
+      Seq("in", buildInteger(
+          getInputBus(startTime, durationFallback)),
+        "delaytime", delaytime,
+        "decaytime", decaytime)
+    }
+  }
+  class MonoDelay extends Delay {
+    override type SelfType = MonoDelay
+
+    override def self(): SelfType = this
+
+    override val instrumentName: String = "monoDelay"
+
+    override val nrOfChannels = 1
+  }
+
+  class StereoDelay extends Delay {
+    override type SelfType = StereoDelay
+
+    override def self(): SelfType = this
+
+    override val instrumentName: String = "stereoDelay"
+
+    override val nrOfChannels = 2
   }
 
   class XFade extends AudioInstrument {
@@ -317,13 +376,13 @@ object Instruments {
       Seq(
         "in1", buildInteger(
           in1Bus.getOutputBus.dynamicBus(startTime,
-            in1Bus.optionalDur.getOrElse(durationFallback))),
+            startTime + in1Bus.optionalDur.getOrElse(duration))),
         "in2", buildInteger(
           in2Bus.getOutputBus.dynamicBus(startTime,
-            in2Bus.optionalDur.getOrElse(durationFallback))),
+            startTime + in2Bus.optionalDur.getOrElse(duration))),
         "xfadeBus", buildInteger(
           xfadeBus.getOutputBus.dynamicBus(startTime,
-            xfadeBus.optionalDur.getOrElse(durationFallback))))
+            startTime + xfadeBus.optionalDur.getOrElse(duration))))
     }
   }
 
@@ -352,10 +411,10 @@ object Instruments {
       Seq(
         "in1", buildInteger(
           in1Bus.getOutputBus.dynamicBus(startTime,
-            in1Bus.optionalDur.getOrElse(durationFallback))),
+            startTime + in1Bus.optionalDur.getOrElse(duration))),
         "in2", buildInteger(
           in2Bus.getOutputBus.dynamicBus(startTime,
-            in2Bus.optionalDur.getOrElse(durationFallback))))
+            startTime + in2Bus.optionalDur.getOrElse(duration))))
     }
   }
 
@@ -381,9 +440,9 @@ object Instruments {
     override def internalBuild(startTime: Float, duration: Float): Seq[Object] =
       Seq(
         "freqBus", freqBus.getOutputBus.dynamicBus(startTime,
-          buildFloat(freqBus.optionalDur.getOrElse(duration))),
+          startTime + freqBus.optionalDur.getOrElse(duration)),
         "ampBus", ampBus.getOutputBus.dynamicBus(startTime,
-          buildFloat(ampBus.optionalDur.getOrElse(duration))))
+          startTime + ampBus.optionalDur.getOrElse(duration)))
   }
 
   class PulseOsc extends AudioInstrument {
@@ -408,9 +467,9 @@ object Instruments {
     override def internalBuild(startTime: Float, duration: Float): Seq[Object] =
       Seq(
         "freqBus", freqBus.getOutputBus.dynamicBus(startTime,
-          buildFloat(freqBus.optionalDur.getOrElse(duration))),
+          startTime + freqBus.optionalDur.getOrElse(duration)),
         "ampBus", ampBus.getOutputBus.dynamicBus(startTime,
-          buildFloat(ampBus.optionalDur.getOrElse(duration))))
+          startTime + ampBus.optionalDur.getOrElse(duration)))
   }
 
   class SawOsc extends AudioInstrument {
@@ -435,9 +494,9 @@ object Instruments {
     override def internalBuild(startTime: Float, duration: Float): Seq[Object] =
       Seq(
         "freqBus", freqBus.getOutputBus.dynamicBus(startTime,
-          buildFloat(freqBus.optionalDur.getOrElse(duration))),
+          startTime + freqBus.optionalDur.getOrElse(duration)),
         "ampBus", ampBus.getOutputBus.dynamicBus(startTime,
-          buildFloat(ampBus.optionalDur.getOrElse(duration))))
+          startTime + ampBus.optionalDur.getOrElse(duration)))
   }
 
   class SineOsc extends AudioInstrument {
@@ -462,9 +521,9 @@ object Instruments {
     override def internalBuild(startTime: Float, duration: Float): Seq[Object] =
       Seq(
         "freqBus", freqBus.getOutputBus.dynamicBus(startTime,
-          buildFloat(freqBus.optionalDur.getOrElse(duration))),
+          startTime + freqBus.optionalDur.getOrElse(duration)),
         "ampBus", ampBus.getOutputBus.dynamicBus(startTime,
-          buildFloat(ampBus.optionalDur.getOrElse(duration))))
+          startTime + ampBus.optionalDur.getOrElse(duration)))
   }
 
   class WhiteNoiseOsc extends AudioInstrument {
@@ -487,7 +546,7 @@ object Instruments {
     override def internalBuild(startTime: Float, duration: Float): Seq[Object] =
       Seq(
         "ampBus", ampBus.getOutputBus.dynamicBus(startTime,
-          buildFloat(ampBus.optionalDur.getOrElse(duration))))
+          startTime + ampBus.optionalDur.getOrElse(duration)))
   }
 
   class MoogFilter extends AudioInstrument {
@@ -517,13 +576,13 @@ object Instruments {
       Seq(
         "in", buildInteger(
           inBus.getOutputBus.dynamicBus(startTime,
-            inBus.optionalDur.getOrElse(durationFallback))),
+            startTime + inBus.optionalDur.getOrElse(duration))),
         "freqBus", buildInteger(
           freqBus.getOutputBus.dynamicBus(startTime,
-            freqBus.optionalDur.getOrElse(durationFallback))),
+            startTime + freqBus.optionalDur.getOrElse(duration))),
         "gainBus", buildInteger(
           gainBus.getOutputBus.dynamicBus(startTime,
-            gainBus.optionalDur.getOrElse(durationFallback))))
+            startTime + gainBus.optionalDur.getOrElse(duration))))
     }
   }
 
@@ -554,13 +613,13 @@ object Instruments {
       Seq(
         "in", buildInteger(
           inBus.getOutputBus.dynamicBus(startTime,
-            inBus.optionalDur.getOrElse(durationFallback))),
+            startTime + inBus.optionalDur.getOrElse(duration))),
         "freqBus", buildInteger(
           freqBus.getOutputBus.dynamicBus(startTime,
-            freqBus.optionalDur.getOrElse(durationFallback))),
+            startTime + freqBus.optionalDur.getOrElse(duration))),
         "decayBus", buildInteger(
           decayBus.getOutputBus.dynamicBus(startTime,
-            decayBus.optionalDur.getOrElse(durationFallback))))
+            startTime + decayBus.optionalDur.getOrElse(duration))))
     }
   }
 
@@ -589,10 +648,10 @@ object Instruments {
       Seq(
         "carrierBus", buildInteger(
           carrierBus.getOutputBus.dynamicBus(startTime,
-            carrierBus.optionalDur.getOrElse(durationFallback))),
+            startTime + carrierBus.optionalDur.getOrElse(duration))),
         "modulatorFreqBus", buildInteger(
           modulatorFreqBus.getOutputBus.dynamicBus(startTime,
-            modulatorFreqBus.optionalDur.getOrElse(durationFallback))))
+            startTime + modulatorFreqBus.optionalDur.getOrElse(duration))))
     }
   }
 
@@ -621,10 +680,10 @@ object Instruments {
       Seq(
         "carrierBus", buildInteger(
           carrierBus.getOutputBus.dynamicBus(startTime,
-            carrierBus.optionalDur.getOrElse(durationFallback))),
+            startTime + carrierBus.optionalDur.getOrElse(duration))),
         "modulatorFreqBus", buildInteger(
           modulatorFreqBus.getOutputBus.dynamicBus(startTime,
-            modulatorFreqBus.optionalDur.getOrElse(durationFallback))))
+            startTime + modulatorFreqBus.optionalDur.getOrElse(duration))))
     }
   }
 
@@ -650,13 +709,13 @@ object Instruments {
       Seq(
         "carrierFreqBus", buildInteger(
           carrierFreqBus.getOutputBus.dynamicBus(startTime,
-            carrierFreqBus.optionalDur.getOrElse(durationFallback))),
+            startTime + carrierFreqBus.optionalDur.getOrElse(duration))),
         "modulatorBus", buildInteger(
           modulatorBus.getOutputBus.dynamicBus(startTime,
-            modulatorBus.optionalDur.getOrElse(durationFallback))),
+            startTime + modulatorBus.optionalDur.getOrElse(duration))),
         "ampBus", buildInteger(
           ampBus.getOutputBus.dynamicBus(startTime,
-            ampBus.optionalDur.getOrElse(durationFallback))))
+            startTime + ampBus.optionalDur.getOrElse(duration))))
     }
   }
 

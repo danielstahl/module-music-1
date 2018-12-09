@@ -30,14 +30,13 @@ import java.{lang => jl}
   */
 object ModularInstrument {
 
-
   trait Bus {
     def busAllocator: BusAllocator
     var busValue: Option[Integer] = None
 
-    def dynamicBus(startTime: Float, endTime: Float): Integer = {
+    def dynamicBus(startTime: Float, endTime: Float, nrOfChannels: Int = 1): Integer = {
       if(busValue.isEmpty) {
-        val allocatedBuses = busAllocator.allocate(1, startTime, endTime)
+        val allocatedBuses = busAllocator.allocate(nrOfChannels, startTime, endTime)
         this.busValue = Option(allocatedBuses.head)
       }
       busValue.get
@@ -51,6 +50,7 @@ object ModularInstrument {
 
   class AudioBus extends Bus {
     def busAllocator: BusAllocator = BusAllocator.audio
+
   }
 
   class ControlBus extends Bus {
@@ -59,6 +59,9 @@ object ModularInstrument {
 
   trait ModularInstrument {
     type SelfType <: ModularInstrument
+    type OutputBusType <: Bus
+    type OutputInstrumentType <: ModularInstrument
+
     def self(): SelfType
 
     val id: String = UUID.randomUUID().toString
@@ -88,7 +91,9 @@ object ModularInstrument {
     /**
       * return this instruments output bus
       */
-    def getOutputBus: Bus
+    def getOutputBus: OutputBusType
+
+    def withOutput(output: OutputInstrumentType): SelfType
 
     /**
       * Build a flattened graph of this instrument and it's children
@@ -133,6 +138,7 @@ object ModularInstrument {
     def build(startTime: Float, duration: Float): Seq[Object] = {
       if(!instrumentIsBuilt) {
         val finalDuration = buildFloat(optionalDur.getOrElse(duration))
+
         val graph = Seq(
           instrumentName,
           Integer.valueOf(-1), addAction.action, nodeId.nodeId,
@@ -149,12 +155,39 @@ object ModularInstrument {
   }
 
   trait AudioInstrument extends ModularInstrument {
-    val bus = new AudioBus
+    override type OutputBusType = AudioBus
+    override type OutputInstrumentType = AudioInstrument
+    var bus = new AudioBus
     override def getOutputBus: AudioBus = bus
+
+    def withOutput(output: AudioInstrument): SelfType = {
+      this.bus = output.getOutputBus
+      self()
+    }
   }
 
   trait ControlInstrument extends ModularInstrument {
-    val bus = new ControlBus
+    override type OutputBusType = ControlBus
+    override type OutputInstrumentType = ControlInstrument
+
+    var bus = new ControlBus
     override def getOutputBus: ControlBus = bus
+
+    override def withOutput(output: ControlInstrument): SelfType = {
+      this.bus = output.getOutputBus
+      self()
+    }
+  }
+
+  class StaticAudioBusInstrument extends AudioInstrument {
+    override type SelfType = StaticAudioBusInstrument
+
+    override def self(): SelfType = this
+
+    override val instrumentName: String = "NONE"
+
+    override def graph(parent: Seq[ModularInstrument]): Seq[ModularInstrument] = parent
+
+    override def internalBuild(startTime: Float, duration: Float): Seq[Object] = Seq.empty
   }
 }

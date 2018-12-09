@@ -4,9 +4,6 @@ import net.soundmining.Instrument.{TAIL_ACTION, setupNodes}
 import Instruments._
 import net.soundmining.Utils.absoluteTimeToMillis
 import Note._
-import net.soundmining.ModularInstrument.ModularInstrument
-
-import scala.util.Random
 
 object Test {
 
