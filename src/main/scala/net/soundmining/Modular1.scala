@@ -164,13 +164,6 @@ object Modular1 {
     play(rhythm(20), duration(20), simpleFm(0.5f, attack(20), chord6._1, chord6._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
 
     play(rhythm(20), 0.1f, shortFm( 0.7f, 0.01f, chord6._2, chord6._1, delayAudioBus))
-
-    // This should perhaps be in the development
-/*
-    play(rythm(21), duration(21), simpleFm(0.7f, attack(21), chord1._2, chord1._1, (0, 130), time1 * 8), (0.7f, -0.7f))
-    play(rythm(22), duration(22), simpleFm(0.5f, attack(22), chord1._1, chord1._2, (0, 130), time1 * 5), (-0.7f, 0.7f))
-
-    play(rythm(22), 0.1f, shortFm( 0.7f, 0.01f, chord1._2, chord1._1, delayAudioBus))*/
   }
 
   def development1(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
@@ -182,20 +175,21 @@ object Modular1 {
     val chord1Sidebands = makeFmSynthesis(chord1._1, chord1._2, 50)
     val chord1Spectrum = majorSidebands.map(_._1)
 
-    println(s"Chord1 spectrum $chord1Spectrum")
-
-    val longRhythm = absolute(startTime, Seq(time2 * 21, time2 * 21, time2 * 21, time2 * 21))
+    val longRhythm = absolute(startTime, Seq(time2 * 21, time2 * 21, time2 * 21, time2 * 21, time2 * 21))
     val longDuration = Seq(time2 * 21, time2 * 21, time2 * 21, time2 * 21)
     val longAttack = Seq(time2 * 13, time2 * 13, time2 * 13, time2 * 13)
 
+    println(s"development1 longRhythm $longRhythm")
     play(longRhythm.head, longDuration.head, sineRing(1.1f, longAttack.head, chord1Spectrum(8), chord1Spectrum(5)), (0.7f, -0.7f))
     play(longRhythm(1), longDuration(1), sineRing(1.1f, longAttack(1), chord1Spectrum(10), chord1Spectrum(6)), (-0.7f, 0.7f))
     play(longRhythm(2), longDuration(2), sineRing(1.1f, longAttack(2), chord1Spectrum(9), chord1Spectrum(7)), (0.7f, -0.7f))
     play(longRhythm(3), longDuration(3), sineRing(1.1f, longAttack(3), chord1Spectrum(11), chord1Spectrum(8)), (-0.7f, 0.7f))
 
-    val shortRhythm = absolute(startTime, Seq(time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8))
+    val shortRhythm = absolute(startTime, Seq(time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8, time1 * 8))
     val shortDuration = Seq(time1 * 13, time1 * 21, time1 * 13, time1 * 21, time1 * 13, time1 * 21, time1 * 13, time1 * 21, time1 * 13, time1 * 21, time1 * 13, time1 * 21)
     val shortAttack = Seq(time1 * 8, time1 * 5, time1 * 8, time1 * 5, time1 * 8, time1 * 5, time1 * 8, time1 * 5, time1 * 8, time1 * 5, time1 * 8, time1 * 5)
+
+    println(s"development1 shortRhythm $shortRhythm")
 
     play(shortRhythm.head, shortDuration.head, sineFm(0.5f, shortAttack.head, chord1Spectrum(3), sineModulator(chord1Spectrum(4), (100, 1000), time1 * 8)), (-0.3f, 0.3f))
     play(shortRhythm(1), shortDuration(1), triangleFm(0.5f, shortAttack(1), chord1Spectrum(4), pulseModulator(chord1Spectrum(3), (100, 900), time1 * 5)), (0.3f, -0.3f))
@@ -216,6 +210,71 @@ object Modular1 {
     play(shortRhythm(11), shortDuration(11), triangleFm(0.5f, shortAttack(11), chord1Spectrum(8), sineModulator(chord1Spectrum(14), (100, 1100), time1 * 8)), (-0.3f, 0.3f))
   }
 
+  def development2(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
+    val time = (majorSpectrum(3) / 1000f, majorSpectrum(4) / 1000f)
+    val (time1, time2) = time
+
+    val chord1 = (majorSpectrum(11), majorSpectrum(12))
+
+    val spectrum = majorSidebands.map(_._1)
+
+    println(s"Chord1 spectrum $spectrum")
+
+    val rhythm = absolute(startTime, Seq(
+      time2 * 8, time2 * 8, time2 * 13,
+      time2 * 8, time2 * 8, time2 * 13,
+      time2 * 8, time2 * 8, time2 * 13,
+      time2 * 8, time2 * 8, time2 * 13))
+    val duration = Seq(time2 * 8, time2 * 8, time2 * 8, time2 * 8, time2 * 8, time2 * 8, time2 * 8, time2 * 8, time2 * 8, time2 * 8, time2 * 8, time2 * 8)
+    val attack = Seq(time2 * 4, time2 * 4, time2 * 4, time2 * 4, time2 * 4, time2 * 4, time2 * 4, time2 * 4, time2 * 4, time2 * 4, time2 * 4, time2 * 4)
+
+    println(s"Development2 rhythm $rhythm")
+
+    play(rhythm.head, duration.head, sineFm(0.4f, attack.head, spectrum(11), sineModulator(spectrum(12), (100, 1500), time2 * 4)), (-0.4f, -0.2f))
+    play(rhythm(1), duration(1), sineFm(0.7f, attack(1), spectrum(12), sineModulator(spectrum(11), (100, 1500), time2 * 4)), (-0.2f, 0.2f))
+    play(rhythm(2), duration(2), sineFm(0.3f, attack(2), spectrum(11), sineModulator(spectrum(12), (100, 1500), time2 * 4)), (0.2f, 0.4f))
+
+    play(rhythm(3), duration(3), sineFm(0.4f, attack(3), spectrum(8), triangleModulator(spectrum(14), (100, 1500), time2 * 4)), (0.4f, 0.2f))
+    play(rhythm(4), duration(4), sineFm(0.7f, attack(4), spectrum(14), triangleModulator(spectrum(8), (100, 1500), time2 * 4)), (0.2f, -0.2f))
+    play(rhythm(5), duration(5), sineFm(0.3f, attack(5), spectrum(8), triangleModulator(spectrum(14), (100, 1500), time2 * 4)), (-0.2f, -0.4f))
+
+    play(rhythm(6), duration(6), sineFm(0.4f, attack(6), spectrum(7), pulseModulator(spectrum(12), (100, 1500), time2 * 4)), (-0.4f, -0.2f))
+    play(rhythm(7), duration(7), sineFm(0.7f, attack(7), spectrum(12), pulseModulator(spectrum(7), (100, 1500), time2 * 4)), (-0.2f, 0.2f))
+    play(rhythm(8), duration(8), sineFm(0.3f, attack(8), spectrum(7), pulseModulator(spectrum(12), (100, 1500), time2 * 4)), (0.2f, 0.4f))
+
+    play(rhythm(9), duration(9), sineFm(0.4f, attack(9), spectrum(6), triangleModulator(spectrum(10), (100, 1500), time2 * 4)), (0.4f, 0.2f))
+    play(rhythm(10), duration(10), sineFm(0.7f, attack(10), spectrum(10), triangleModulator(spectrum(6), (100, 1500), time2 * 4)), (0.2f, -0.2f))
+    play(rhythm(11), duration(11), sineFm(0.3f, attack(11), spectrum(6), triangleModulator(spectrum(10), (100, 1500), time2 * 4)), (-0.2f, -0.4f))
+
+    val chord1Sidebands = makeFmSynthesis(chord1._1, chord1._2, 50)
+    val chord1Spectrum = chord1Sidebands.map(_._1)
+
+    play(rhythm.head, time2 * 13, ring(chord1Spectrum(2), sineFm(0.4f, attack.head, spectrum(11), sineModulator(spectrum(12), (100, 1500), time2 * 4))), (0.4f, 0.2f))
+    play(rhythm(1), time2 * 13, ring(chord1Spectrum(2), sineFm(0.7f, attack(1), spectrum(12), sineModulator(spectrum(11), (100, 1500), time2 * 4))), (0.2f, -0.2f))
+    play(rhythm(2), time2 * 13, ring(chord1Spectrum(2), sineFm(0.3f, attack(2), spectrum(11), sineModulator(spectrum(12), (100, 1500), time2 * 4))), (-0.2f, -0.4f))
+
+    val chord2Sidebands = makeFmSynthesis(spectrum(8), spectrum(14), 50)
+    val chord2Spectrum = chord2Sidebands.map(_._1)
+
+    play(rhythm(3), time2 * 13, ring(chord2Spectrum(2), sineFm(0.4f, attack(3), spectrum(8), triangleModulator(spectrum(14), (100, 1500), time2 * 4))), (-0.4f, -0.2f))
+    play(rhythm(4), time2 * 13, ring(chord2Spectrum(2), sineFm(0.7f, attack(4), spectrum(14), triangleModulator(spectrum(8), (100, 1500), time2 * 4))), (-0.2f, 0.2f))
+    play(rhythm(5), time2 * 13, ring(chord2Spectrum(2), sineFm(0.3f, attack(5), spectrum(8), triangleModulator(spectrum(14), (100, 1500), time2 * 4))), (0.2f, 0.4f))
+
+    val chord3Sidebands = makeFmSynthesis(spectrum(7), spectrum(12), 50)
+    val chord3Spectrum = chord3Sidebands.map(_._1)
+
+    play(rhythm(6), time2 * 13, ring(chord3Spectrum(2), sineFm(0.4f, attack(6), spectrum(7), pulseModulator(spectrum(12), (100, 1500), time2 * 4))), (0.4f, 0.2f))
+    play(rhythm(7), time2 * 13, ring(chord3Spectrum(2), sineFm(0.7f, attack(7), spectrum(12), pulseModulator(spectrum(7), (100, 1500), time2 * 4))), (0.2f, -0.2f))
+    play(rhythm(8), time2 * 13, ring(chord3Spectrum(2), sineFm(0.3f, attack(8), spectrum(7), pulseModulator(spectrum(12), (100, 1500), time2 * 4))), (-0.2f, -0.4f))
+
+    val chord4Sidebands = makeFmSynthesis(spectrum(6), spectrum(10), 50)
+    val chord4Spectrum = chord4Sidebands.map(_._1)
+
+    play(rhythm(9), time2 * 13, ring(chord4Spectrum(2), sineFm(0.4f, attack(9), spectrum(6), triangleModulator(spectrum(10), (100, 1500), time2 * 4))), (-0.4f, -0.2f))
+    play(rhythm(10), time2 * 13, ring(chord4Spectrum(2), sineFm(0.7f, attack(10), spectrum(10), triangleModulator(spectrum(6), (100, 1500), time2 * 4))), (-0.2f, 0.2f))
+    play(rhythm(11), time2 * 13, ring(chord4Spectrum(2), sineFm(0.3f, attack(11), spectrum(6), triangleModulator(spectrum(10), (100, 1500), time2 * 4))), (0.2f, 0.4f))
+  }
+
   def sine(ampValue: Float, attackTime: Float, freq: Float): SineOsc = {
     val amp = percControl(0.001f, ampValue, attackTime, Right(Instrument.LINEAR))
     sineOsc(amp, staticControl(freq)).addAction(TAIL_ACTION)
@@ -224,6 +283,10 @@ object Modular1 {
   def pulse(ampValue: Float, attackTime: Float, freq: Float): PulseOsc = {
     val amp = percControl(0, ampValue, attackTime, Right(Instrument.SINE))
     pulseOsc(amp, staticControl(freq)).addAction(TAIL_ACTION)
+  }
+
+  def ring(modFreq: Float, carrier: AudioInstrument): RingModulate = {
+    ringModulate(carrier, staticControl(modFreq)).addAction(TAIL_ACTION)
   }
 
   def ringSine(ampValue: Float, attackTime: Float, modFreq: Float, carrierFreq: Float): RingModulate = {
@@ -271,6 +334,11 @@ object Modular1 {
     triangleOsc(modAmountControl, staticControl(modFreq))
   }
 
+  def sawModulator(modFreq: Float, modAmount: (Float, Float), modAttackTime: Float): SawOsc = {
+    val modAmountControl = percControl(modAmount._1, modAmount._2, modAttackTime, Right(Instrument.SINE))
+    sawOsc(modAmountControl, staticControl(modFreq))
+  }
+
   def sineFm(ampValue: Float, attackTime: Float, carrierFreq: Float, modulator: AudioInstrument): FmSineModulate = {
     val amp = percControl(0.001f, ampValue, attackTime, Right(Instrument.SINE))
     fmSineModulate(staticControl(carrierFreq), modulator, amp).addAction(TAIL_ACTION)
@@ -284,6 +352,11 @@ object Modular1 {
   def pulseFm(ampValue: Float, attackTime: Float, carrierFreq: Float, modulator: AudioInstrument): FmPulseModulate = {
     val amp = percControl(0.001f, ampValue, attackTime, Right(Instrument.SINE))
     fmPulseModulate(staticControl(carrierFreq), modulator, amp).addAction(TAIL_ACTION)
+  }
+
+  def sawFm(ampValue: Float, attackTime: Float, carrierFreq: Float, modulator: AudioInstrument): FmSawModulate = {
+    val amp = percControl(0.001f, ampValue, attackTime, Right(Instrument.SINE))
+    fmSawModulate(staticControl(carrierFreq), modulator, amp).addAction(TAIL_ACTION)
   }
 
   def xfadeModulateFm(ampValue: Float, attackTime: Float, modFreq: Float, carrierFreq: Float, modAmount: (Float, Float), modAttackTime: Float): FmModulate = {
@@ -355,6 +428,7 @@ object Modular1 {
 
     exposition(0f)
     development1(104.71566f)
+    development2(141.34325f)
   }
 
 }
