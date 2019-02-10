@@ -107,7 +107,7 @@ object Modular1 {
 
     play(rhythm.head, duration.head, simpleFm(0.7f, attack.head, chord1._2, chord1._1, (0, 130), time1 * 8), (-0.7f, 0.7f))
     play(rhythm(1), duration(1), simpleFm(0.5f, attack(1), chord1._1, chord1._2, (0, 130), time1 * 5), (0.7f, -0.7f))
-
+    println(s"exp short pulse start $pulseStartTime")
     play(pulseStartTime, 0.1f, shortFm( 0.7f, 0.01f, chord1._2, chord1._1, delayAudioBus))
 
     val chord2 = (majorSpectrum(5), majorSpectrum(7))
@@ -180,6 +180,7 @@ object Modular1 {
     val longAttack = Seq(time2 * 13, time2 * 13, time2 * 13, time2 * 13)
 
     println(s"Development1 longRhythm $longRhythm")
+    println(s"Development1 long start ${longDuration.head}")
     play(longRhythm.head, longDuration.head, sineRing(1.1f, longAttack.head, chord1Spectrum(8), chord1Spectrum(5)), (0.7f, -0.7f))
     play(longRhythm(1), longDuration(1), sineRing(1.1f, longAttack(1), chord1Spectrum(10), chord1Spectrum(6)), (-0.7f, 0.7f))
     play(longRhythm(2), longDuration(2), sineRing(1.1f, longAttack(2), chord1Spectrum(9), chord1Spectrum(7)), (0.7f, -0.7f))
@@ -191,11 +192,14 @@ object Modular1 {
 
     println(s"Development1 shortRhythm $shortRhythm")
 
+    println(s"Short track 1 ${shortRhythm.head}")
+    println(s"Short track 2 ${shortRhythm(1)}")
+
     play(shortRhythm.head, shortDuration.head, sineFm(0.5f, shortAttack.head, chord1Spectrum(3), sineModulator(chord1Spectrum(4), (100, 1000), time1 * 8)), (-0.3f, 0.3f))
-    play(shortRhythm(1), shortDuration(1), triangleFm(0.5f, shortAttack(1), chord1Spectrum(4), pulseModulator(chord1Spectrum(3), (100, 900), time1 * 5)), (0.3f, -0.3f))
+    play(shortRhythm(1), shortDuration(1), triangleFm(0.50f, shortAttack(1), chord1Spectrum(4), pulseModulator(chord1Spectrum(3), (100, 700), time1 * 5)), (0.3f, -0.3f))
 
     play(shortRhythm(2), shortDuration(2), sineFm(0.5f, shortAttack(2), chord1Spectrum(5), triangleModulator(chord1Spectrum(7), (100, 1000), time1 * 8)), (0.3f, -0.3f))
-    play(shortRhythm(3), shortDuration(3), triangleFm(0.5f, shortAttack(3), chord1Spectrum(7), sineModulator(chord1Spectrum(5), (100, 900), time1 * 5)), (-0.3f, 0.3f))
+    play(shortRhythm(3), shortDuration(3), triangleFm(0.45f, shortAttack(3), chord1Spectrum(7), pulseModulator(chord1Spectrum(5), (100, 900), time1 * 5)), (-0.3f, 0.3f))
 
     play(shortRhythm(4), shortDuration(4), sineFm(0.5f, shortAttack(4), chord1Spectrum(6), pulseModulator(chord1Spectrum(9), (100, 900), time1 * 5)), (0.3f, -0.3f))
     play(shortRhythm(5), shortDuration(5), triangleFm(0.5f, shortAttack(5), chord1Spectrum(9), sineModulator(chord1Spectrum(6), (100, 900), time1 * 8)), (-0.3f, 0.3f))
@@ -208,6 +212,7 @@ object Modular1 {
 
     play(shortRhythm(10), shortDuration(10), sineFm(0.5f, shortAttack(10), chord1Spectrum(14), pulseModulator(chord1Spectrum(8), (100, 1100), time1 * 5)), (0.3f, -0.3f))
     play(shortRhythm(11), shortDuration(11), triangleFm(0.5f, shortAttack(11), chord1Spectrum(8), sineModulator(chord1Spectrum(14), (100, 1100), time1 * 8)), (-0.3f, 0.3f))
+
   }
 
   def development2(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
@@ -271,6 +276,7 @@ object Modular1 {
     play(rhythm(9), time2 * 13, ring(chord4Spectrum(2), sineFm(0.4f, attack(9), spectrum(6), triangleModulator(spectrum(10), (100, 1500), time2 * 4))), (-0.4f, -0.2f))
     play(rhythm(10), time2 * 13, ring(chord4Spectrum(2), sineFm(0.7f, attack(10), spectrum(10), triangleModulator(spectrum(6), (100, 1500), time2 * 4))), (-0.2f, 0.2f))
     play(rhythm(11), time2 * 13, ring(chord4Spectrum(2), sineFm(0.3f, attack(11), spectrum(6), triangleModulator(spectrum(10), (100, 1500), time2 * 4))), (0.2f, 0.4f))
+
   }
 
   def development3(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
@@ -327,12 +333,11 @@ object Modular1 {
     println(s"Development3 short rhythm $shortRhythm")
 
     play(longRhythm.head, time1 * 13, sineFm(0.7f, time1 * 5, chord1._2, sineModulator(chord1._1, (0, 130), time1 * 8)), (-0.7f, 0.7f))
-    play(longRhythm(1), time1 * 13, sineFm(0.5f, time1 * 8, chord1._1, pulseModulator(chord1._2, (250, 400), time1 * 5)), (0.7f, -0.7f))
+    play(longRhythm(1), time1 * 13, sineFm(0.5f, time1 * 8, chord1._1, pulseModulator(chord1._2, (150, 400), time1 * 5)), (0.7f, -0.7f))
 
-
+    println(s"Development3 short start ${shortRhythm.head}")
     play(shortRhythm.head, 0.1f,
       output(sineFm(0.7f, 0.01f, chord1._1, sineModulator(chord1._2, (1300, 1000), 0.01f), Instrument.EXPONENTIAL), delayAudioBus1))
-
 
     val chord2 = (majorSpectrum(5), majorSpectrum(7))
 
@@ -376,6 +381,7 @@ object Modular1 {
 
     val chord4 = (majorSpectrum(10), majorSpectrum(13))
 
+    println(s"Development 3 long track2 start ${longRhythm(7)}")
     play(longRhythm(7), time1 * 13,
       triangleFm(0.4f, time1 * 8, chord4._2, sineModulator(chord4._1, (900, 1100), time1 * 8)), (0.7f, -0.7f))
     play(longRhythm(7), time1 * 13,
@@ -384,7 +390,7 @@ object Modular1 {
     play(longRhythm(8), time1 * 13,
       sineFm(0.4f, time1 * 5, chord4._1, pulseModulator(chord4._1, (800, 1200), time1 * 5)), (-0.7f, 0.7f))
     play(longRhythm(8), time1 * 13,
-      ring(chord1Spectrum(4), sineFm(0.4f, time1 * 8, chord4._1, pulseModulator(chord4._1, (800, 1200), time1 * 8))), (0.7f, -0.7f))
+      ring(chord1Spectrum(4), sineFm(0.4f, time1 * 8, chord4._1, sineModulator(chord4._2, (800, 400), time1 * 8))), (0.7f, -0.7f))
 
     play(shortRhythm(6), 0.1f,
       output(
@@ -475,7 +481,7 @@ object Modular1 {
 
     play(rhythm.head, time1 * 13, simpleFm(0.7f, time1 * 5, chord1._2, chord1._1, (0, 130), time1 * 8), (-0.7f, 0.7f))
     play(rhythm(1), time1 * 13, simpleFm(0.5f, time1 * 8, chord1._1, chord1._2, (0, 130), time1 * 5), (0.7f, -0.7f))
-
+    println(s"Recapitulation short start $pulseStartTime")
     play(pulseStartTime, 0.1f, shortFm( 0.7f, 0.01f, chord1._2, chord1._1, delayAudioBus))
   }
 
@@ -639,11 +645,11 @@ object Modular1 {
     println("mirrored spectrum")
     println(mirroredSpectrum.map(hertzToNote).zipWithIndex.mkString(", "))
 
-
     exposition(0f)
     development1(104.71566f)
     development2(141.34325f)
     development3(181.76443f + (13 * time1) + (8 * time1))
+
     recapitulation(255.73912f + (13 * time1) + (8 * time1))
   }
 

@@ -969,3 +969,9 @@ w.front;
 (
 {SinOsc.ar(0.5).linlin(-1, 1, 300, 3000)}.plot(4);
 )
+
+
+// Whitenoises advice on mixing. https://www.youtube.com/watch?v=Taylf4EQqhI
+// Reverb, compressor and limiter
+// Other tips https://www.youtube.com/watch?v=XD2swcN0h8c
+// Record into reaper https://www.youtube.com/watch?v=V8BTR3BZoHg
