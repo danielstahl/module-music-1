@@ -68,7 +68,7 @@ object Test {
     setupNodes(player)
     val amp = percControl(0.001f, 0.1f, 3f, Right(Instrument.LINEAR))
     val filterFreqBus = lineControl(4000f, 500f)
-    val noise = whiteNoise(amp).addAction(TAIL_ACTION)
+    val noise = whiteNoiseOsc(amp).addAction(TAIL_ACTION)
     val resonentFilter = resonantFilter(noise, filterFreqBus, staticControl(0.1f)).addAction(TAIL_ACTION)
     val pan = panning(resonentFilter, lineControl(-1f, 1f)).addAction(TAIL_ACTION)
     pan.getOutputBus.staticBus(0)

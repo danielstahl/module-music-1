@@ -6,6 +6,9 @@
 s = Server.local;
 s.options.outDevice = "Built-in Output";
 //s.options.outDevice = "Scarlett 2i2 USB";
+//s.options.outDevice = "MOMENTUM M2 AEBT";
+//s.options.outDevice = "Soundflower (2ch)";
+//s.options.outDevice = "SoundflowerAgg";
 s.options.blockSize = 128;
 s.options.sampleRate = 96000;
 s.options.numBuffers = 2056;
@@ -62,6 +65,18 @@ SynthDef(\controlMix, {
 	Out.kr(out, result);
 }).add;
 
+SynthDef(\threeBlockControl, {
+	arg dur = 1, startValue1, len1, startValue2, len2, startValue3, len3, endValue3, curve = 'lin', out = 0;
+	var threeBlockEnv;
+	threeBlockEnv = EnvGen.kr(
+		Env.new(
+			levels: [startValue1, startValue2, startValue3, endValue3],
+			times: [len1, len2, len3],
+			curve: curve),
+		doneAction:2);
+	Out.kr(out, threeBlockEnv);
+}).add;
+
 SynthDef(\whiteNoiseOsc, {
 	arg dur = 1, ampBus = 0, out = 0;
 	var noise, amp;
@@ -108,6 +123,16 @@ SynthDef(\triangleOsc, {
 	amp = In.kr(ampBus, 1);
 	freq = In.kr(freqBus, 1);
 	sig = LFTri.ar(freq, mul:amp);
+	Out.ar(out, sig);
+}).add;
+
+SynthDef(\dustOsc, {
+	arg dur = 1, freqBus = 0, ampBus = 0, out = 0;
+	var sig, amp, freq;
+	Line.kr(dur:dur, doneAction:2);
+	amp = In.kr(ampBus, 1);
+	freq = In.kr(freqBus, 1);
+	sig = Dust.ar(freq, mul:amp);
 	Out.ar(out, sig);
 }).add;
 
@@ -278,6 +303,22 @@ SynthDef(\stereoDelay, {
 	Out.ar(out, delaySig + input);
 }).add;
 
+SynthDef(\reverb, {
+	arg in = 0, predelay = 0.048, wet = 0.2, combdelay = 0.1, combdecay = 5, allpassdelay = 0.05, allpassdecay = 1;
+	var sig, input;
+
+	input = input=In.ar(in,2);
+	// Predelay
+	sig = DelayN.ar(input, predelay);
+
+	// 7 Comb filters
+	sig = Mix.fill(7, {CombL.ar(sig, combdelay, Rand(0.01, combdelay), combdecay)});
+	// 4 Allpass
+	4.do({ sig = AllpassN.ar(sig, allpassdelay + 0.001, [Rand(0.01, allpassdelay), Rand(0.01, allpassdelay)], allpassdecay) });
+
+	Out.ar(0, input + (sig * wet));
+}).add;
+
 "Added Instruments".postln;
 )
 
@@ -442,9 +483,11 @@ s.reboot;
 // FM Synthesis algorithms
 // "https://www.youtube.com/watch?v=Y1xPT5D7Oc0"
 
-Bus.control(s, 1).index
-Bus.audio(s, 1).index
-
-
 // Filter modulation with amModulate?
 // https://www.soundonsound.com/techniques/amplitude-modulation
+
+//s.prepareForRecord('/Users/danielstahl/Documents/Projects/modular-i_mix/mvnt-I_sc.aiff');
+s.prepareForRecord();
+s.record;
+s.stopRecording;
+

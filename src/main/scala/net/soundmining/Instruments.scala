@@ -20,6 +20,9 @@ object Instruments {
   def relativePercControl(startValue: Float, peakValue: Float, attackTime: Float, curve: Either[Float, EnvCurve]): PercControl =
     new RelativePercControl().control(startValue, peakValue, attackTime, curve)
 
+  def threeBlockcontrol(startValue1: Float, len1: Float, startValue2: Float, len2: Float, startValue3: Float, len3: Float, endValue3: Float, curve: Either[Float, EnvCurve]): ThreeBlockControl =
+    new ThreeBlockControl().control(startValue1, len1, startValue2, len2, startValue3, len3, endValue3, curve)
+
   def lineControl(startValue: Float, endValue: Float): LineControl =
     new LineControl().control(startValue, endValue)
 
@@ -41,6 +44,9 @@ object Instruments {
   def stereoDelay(inBus: AudioInstrument, delayTime: Float, decayTime: Float): StereoDelay =
     new StereoDelay().delay(inBus, delayTime, decayTime)
 
+  def reverb(inBus: AudioInstrument, preDelay: Float, wet: Float, combDelay: Float, combDecay: Float, allpassDelay: Float, allpassDecay: Float): Reverb =
+    new Reverb().reverb(inBus, preDelay, wet, combDelay, combDecay, allpassDelay, allpassDecay)
+
   def xfade(in1Bus: AudioInstrument, in2Bus: AudioInstrument, xfadeBus: ControlInstrument): XFade =
     new XFade().xfade(in1Bus: AudioInstrument, in2Bus: AudioInstrument, xfadeBus: ControlInstrument)
 
@@ -59,8 +65,11 @@ object Instruments {
   def sineOsc(ampBus: ControlInstrument, freqBus: ControlInstrument): SineOsc =
     new SineOsc().sine(ampBus, freqBus)
 
-  def whiteNoise(ampBus: ControlInstrument): WhiteNoiseOsc =
+  def whiteNoiseOsc(ampBus: ControlInstrument): WhiteNoiseOsc =
     new WhiteNoiseOsc().whiteNoise(ampBus)
+
+  def dustOsc(ampBus: ControlInstrument, freqBus: ControlInstrument): DustOsc =
+    new DustOsc().dust(ampBus, freqBus)
 
   def moogFilter(inBus: AudioInstrument, freqBus: ControlInstrument, gainBus: ControlInstrument): MoogFilter =
     new MoogFilter().filter(inBus, freqBus, gainBus)
@@ -135,6 +144,59 @@ object Instruments {
           case Right(constant) => constant.name
         })
   }
+
+  /*
+  SynthDef(\threeBlockControl, {
+	arg dur = 1, startValue1, len1, startValue2, len2, startValue3, len3, endValue3, curve = 'lin', out = 0;
+  * */
+
+
+  class ThreeBlockControl extends ControlInstrument {
+    type SelfType = ThreeBlockControl
+
+    def self(): SelfType = this
+
+    val instrumentName: String = "threeBlockControl"
+
+    var startValue1: jl.Float = _
+    var len1: jl.Float = _
+    var startValue2: jl.Float = _
+    var len2: jl.Float = _
+    var startValue3: jl.Float = _
+    var len3: jl.Float = _
+    var endValue3: jl.Float = _
+    var curveValue: Either[jl.Float, EnvCurve] = Left(-4f)
+
+    def control(startValue1: Float, len1: Float, startValue2: Float, len2: Float, startValue3: Float, len3: Float, endValue3: Float, curve: Either[Float, EnvCurve]): SelfType = {
+      this.startValue1 = buildFloat(startValue1)
+      this.len1 = buildFloat(len1)
+      this.startValue2 = buildFloat(startValue2)
+      this.len2 = buildFloat(len2)
+      this.startValue3 = buildFloat(startValue3)
+      this.len3 = buildFloat(len3)
+      this.endValue3 = buildFloat(endValue3)
+      this.curveValue = curve.left.map(buildFloat)
+      self()
+    }
+
+    override def graph(parent: Seq[ModularInstrument]): Seq[ModularInstrument] =
+      prependToGraph(parent)
+
+    override def internalBuild(startTime: Float, duration: Float): Seq[Object] =
+      Seq(
+        "startValue1", startValue1,
+        "len1", len1,
+        "startValue2", startValue2,
+        "len2", len2,
+        "startValue3", startValue3,
+        "len3", len3,
+        "endValue3", endValue3,
+        "curve", curveValue match {
+          case Left(floatValue) => floatValue
+          case Right(constant) => constant.name
+        })
+  }
+
 
   class LineControl extends ControlInstrument {
     type SelfType = LineControl
@@ -329,6 +391,7 @@ object Instruments {
         "decaytime", decaytime)
     }
   }
+
   class MonoDelay extends Delay {
     override type SelfType = MonoDelay
 
@@ -347,6 +410,54 @@ object Instruments {
     override val instrumentName: String = "stereoDelay"
 
     override val nrOfChannels = 2
+  }
+
+  class Reverb extends AudioInstrument {
+    override type SelfType = Reverb
+
+    override def self(): SelfType = this
+
+    override val instrumentName: String = "reverb"
+
+    var inBus: AudioInstrument = _
+    var predelay: jl.Float = _
+    var wet: jl.Float = _
+    var combdelay: jl.Float = _
+    var combdecay: jl.Float = _
+    var allpassdelay: jl.Float = _
+    var allpassdecay: jl.Float = _
+
+    def reverb(inBus: AudioInstrument, preDelay: Float, wet: Float, combDelay: Float, combDecay: Float, allpassDelay: Float, allpassDecay: Float): SelfType = {
+      this.inBus = inBus
+      this.predelay = buildFloat(preDelay)
+      this.wet = buildFloat(wet)
+      this.combdelay = buildFloat(combDelay)
+      this.combdecay = buildFloat(combDecay)
+      this.allpassdelay = buildFloat(allpassDelay)
+      this.allpassdecay = buildFloat(allpassDecay)
+      self()
+    }
+
+    override def graph(parent: Seq[ModularInstrument]): Seq[ModularInstrument] =
+      appendToGraph(inBus.graph(parent))
+
+    def getInputBus(startTime: Float, durationFallback: Float): Int =
+      this.inBus.getOutputBus.dynamicBus(startTime,
+        startTime + inBus.optionalDur.getOrElse(durationFallback),
+        2)
+
+    override def internalBuild(startTime: Float, duration: Float): Seq[Object] = {
+      val durationFallback: jl.Float = buildFloat(duration)
+
+      Seq("in", buildInteger(
+        getInputBus(startTime, durationFallback)),
+        "predelay", predelay,
+        "wet", wet,
+        "combdelay", combdelay,
+        "combdecay", combdecay,
+        "allpassdelay", allpassdelay,
+        "allpassdecay", allpassdecay)
+    }
   }
 
   class XFade extends AudioInstrument {
@@ -545,6 +656,33 @@ object Instruments {
 
     override def internalBuild(startTime: Float, duration: Float): Seq[Object] =
       Seq(
+        "ampBus", ampBus.getOutputBus.dynamicBus(startTime,
+          startTime + ampBus.optionalDur.getOrElse(duration)))
+  }
+
+  class DustOsc extends AudioInstrument {
+    type SelfType = DustOsc
+
+    def self(): SelfType = this
+
+    val instrumentName: String = "dustOsc"
+
+    var ampBus: ControlInstrument = _
+    var freqBus: ControlInstrument = _
+
+    def dust(ampBus: ControlInstrument, freqBus: ControlInstrument): SelfType = {
+      this.ampBus = ampBus
+      this.freqBus = freqBus
+      self()
+    }
+
+    override def graph(parent: Seq[ModularInstrument]): Seq[ModularInstrument] =
+      appendToGraph(ampBus.graph(freqBus.graph(parent)))
+
+    override def internalBuild(startTime: Float, duration: Float): Seq[Object] =
+      Seq(
+        "freqBus", freqBus.getOutputBus.dynamicBus(startTime,
+          startTime + freqBus.optionalDur.getOrElse(duration)),
         "ampBus", ampBus.getOutputBus.dynamicBus(startTime,
           startTime + ampBus.optionalDur.getOrElse(duration)))
   }
