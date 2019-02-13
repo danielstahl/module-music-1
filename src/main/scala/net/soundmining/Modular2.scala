@@ -167,62 +167,65 @@ object Modular2 {
     }
   }
 
-  def test10single(startTime: Float = 0f, volume: Float, blocks: (Float, Float, Float), pans: (Float, Float, Float))(implicit player: MusicPlayer): Unit = {
+  def theme1single(startTime: Float = 0f, volume: Float, blocks: (Float, Float, Float), pans: (Float, Float, Float), freqs: (Float, Float, Float, Float))(implicit player: MusicPlayer): Unit = {
     val (block1, block2, block3) = blocks
     val dur = block1 + block2 + block3
     val (pan1, pan2, pan3) = pans
+    val (freq1, freq2, freq3, freq4) = freqs
+
     val volumeControl =
       threeBlockcontrol(0.001f, block1, volume, block2, volume, block3, 0.001f, Right(Instrument.SINE))
 
     play(startTime, dur,
-      ring(staticControl(majorSpectrum(4)),
-        ring(staticControl(majorSpectrum(2)),
+      ring(staticControl(freq4),
+        ring(staticControl(freq3),
           xrossfade(
-            moog(noise(volumeControl), majorSpectrum(33), 0.5f),
-            pulse(volumeControl, staticControl(majorSpectrum(3))),
+            moog(noise(volumeControl), freq2, 0.5f),
+            pulse(volumeControl, staticControl(freq1)),
             staticControl(-0.7f)))),
       threeBlockcontrol(pan1, block1, pan2, block2, pan2, block3, pan3, Right(Instrument.SINE)))
   }
 
-  def test10detune(startTime: Float, duration: Float, volume: Float, attackTime: Float, pans: (Float, Float))(implicit player: MusicPlayer): Unit = {
+  def theme1detune(startTime: Float, duration: Float, volume: Float, attackTime: Float, pans: (Float, Float), freqs: (Float, Float, Float, Float))(implicit player: MusicPlayer): Unit = {
     val (startPan, endPan) = pans
+    val (freq1, freq2, freq3, freq4) = freqs
+
     (0 to 20).foreach {
       i =>
         val volumeControl2 =
           percControl(0.001f, volume, attackTime, Right(Instrument.SINE))
 
         play(startTime, duration,
-          ring(staticControl(randomFreq(majorSpectrum(4))),
-            ring(staticControl(randomFreq(majorSpectrum(2))),
+          ring(staticControl(randomFreq(freq4)),
+            ring(staticControl(randomFreq(freq3)),
               xrossfade(
-                moog(noise(volumeControl2), randomFreq(majorSpectrum(33)), randomFreq(0.5f)),
-                pulse(volumeControl2, staticControl(randomFreq(majorSpectrum(3)))),
+                moog(noise(volumeControl2), randomFreq(freq2), randomFreq(0.5f)),
+                pulse(volumeControl2, staticControl(randomFreq(freq1))),
                 staticControl(randomPan(-0.7f))))),
           lineControl(randomPan(startPan), randomPan(endPan))
         )
     }
   }
 
-  def test11single(startTime: Float = 0f, volume: Float, blocks: (Float, Float, Float), pans: (Float, Float, Float))(implicit player: MusicPlayer): Unit = {
+  def theme2single(startTime: Float = 0f, volume: Float, blocks: (Float, Float, Float), pans: (Float, Float, Float), freqs: (Float, Float, Float))(implicit player: MusicPlayer): Unit = {
     val (block1, block2, block3) = blocks
     val dur = block1 + block2 + block3
     val (pan1, pan2, pan3) = pans
+    val (freq1, freq2, freq3) = freqs
 
     val volumeControl =
       threeBlockcontrol(0.001f, block1, volume, block2, volume, block3, 0.001f, Right(Instrument.SINE))
 
     play(startTime, dur,
-      ring(staticControl(majorSpectrum(25)),
-        ring(staticControl(majorSpectrum(20)),
-          xrossfade(
-            moog(noise(volumeControl), majorSpectrum(45), 0.5f),
-            pulse(volumeControl, staticControl(majorSpectrum(15))),
-            staticControl(-0.7f)))),
+      ring(staticControl(freq3),
+        ring(staticControl(freq2),
+          moog(noise(volumeControl), freq1))),
       threeBlockcontrol(pan1, block1, pan2, block2, pan2, block3, pan3, Right(Instrument.SINE)))
   }
 
-  def test11detune(startTime: Float, duration: Float, volume: Float, attackTime: Float, pans: (Float, Float))(implicit player: MusicPlayer): Unit = {
+  def theme2detune(startTime: Float, duration: Float, volume: Float, attackTime: Float, pans: (Float, Float), freqs: (Float, Float, Float))(implicit player: MusicPlayer): Unit = {
     val (startPan, endPan) = pans
+    val (freq1, freq2, freq3) = freqs
 
     (0 to 20).foreach {
       i =>
@@ -230,151 +233,14 @@ object Modular2 {
           percControl(0.001f, volume, attackTime, Right(Instrument.SINE))
 
         play(startTime, duration,
-          ring(staticControl(randomFreq(majorSpectrum(25))),
-            ring(staticControl(randomFreq(majorSpectrum(20))),
-              xrossfade(
-                moog(noise(volumeControl2), randomFreq(majorSpectrum(45)), randomFreq(0.5f)),
-                pulse(volumeControl2, staticControl(randomFreq(majorSpectrum(15)))),
-                staticControl(randomPan(-0.7f))))),
-          lineControl(randomPan(startPan), randomPan(endPan))
-        )
-    }
-  }
-
-  def test12single(startTime: Float = 0f, volume: Float, blocks: (Float, Float, Float), pans: (Float, Float, Float))(implicit player: MusicPlayer): Unit = {
-    val (block1, block2, block3) = blocks
-    val dur = block1 + block2 + block3
-    val (pan1, pan2, pan3) = pans
-
-    val volumeControl =
-      threeBlockcontrol(0.001f, block1, volume, block2, volume, block3, 0.001f, Right(Instrument.SINE))
-
-    play(startTime, dur,
-      ring(staticControl(majorSpectrum(39)),
-        ring(staticControl(majorSpectrum(43)),
-          xrossfade(
-            moog(noise(volumeControl), majorSpectrum(34), 0.5f),
-            pulse(volumeControl, staticControl(majorSpectrum(36))),
-            staticControl(-0.8f)))),
-      threeBlockcontrol(pan1, block1, pan2, block2, pan2, block3, pan3, Right(Instrument.SINE)))
-
-  }
-
-  def test12detune(startTime: Float, duration: Float, volume: Float, attackTime: Float, pans: (Float, Float))(implicit player: MusicPlayer): Unit = {
-    val (startPan, endPan) = pans
-
-    (0 to 20).foreach {
-      i =>
-        val volumeControl2 =
-          percControl(0.001f, volume, attackTime, Right(Instrument.SINE))
-
-        play(startTime, duration,
-          ring(staticControl(randomFreq(majorSpectrum(39))),
-            ring(staticControl(randomFreq(majorSpectrum(43))),
-              xrossfade(
-                moog(noise(volumeControl2), randomFreq(majorSpectrum(34)), randomFreq(0.5f)),
-                pulse(volumeControl2, staticControl(randomFreq(majorSpectrum(36)))),
-                staticControl(randomPan(-0.7f))))),
-          lineControl(randomPan(startPan), randomPan(endPan))
-        )
-    }
-  }
-
-  def test13single(startTime: Float = 0f, volume: Float, blocks: (Float, Float, Float), pans: (Float, Float, Float))(implicit player: MusicPlayer): Unit = {
-    val (block1, block2, block3) = blocks
-    val dur = block1 + block2 + block3
-    val (pan1, pan2, pan3) = pans
-
-    val volumeControl =
-      threeBlockcontrol(0.001f, block1, volume, block2, volume, block3, 0.001f, Right(Instrument.SINE))
-
-    play(startTime, dur,
-      ring(staticControl(majorSpectrum(7)),
-        ring(staticControl(majorSpectrum(5)),
-          moog(noise(volumeControl), majorSpectrum(6)))),
-      threeBlockcontrol(pan1, block1, pan2, block2, pan2, block3, pan3, Right(Instrument.SINE)))
-  }
-
-  def test13detune(startTime: Float, duration: Float, volume: Float, attackTime: Float, pans: (Float, Float))(implicit player: MusicPlayer): Unit = {
-    val (startPan, endPan) = pans
-
-    (0 to 20).foreach {
-      i =>
-        val volumeControl2 =
-          percControl(0.001f, volume, attackTime, Right(Instrument.SINE))
-
-        play(startTime, duration,
-          ring(staticControl(randomFreq(majorSpectrum(7))),
-            ring(staticControl(randomFreq(majorSpectrum(5))),
-              moog(noise(volumeControl2), randomFreq(majorSpectrum(6))))),
+          ring(staticControl(randomFreq(freq3)),
+            ring(staticControl(randomFreq(freq2)),
+              moog(noise(volumeControl2), randomFreq(freq1)))),
           lineControl(randomPan(startPan), randomPan(endPan)))
     }
   }
 
-  def test14single(startTime: Float = 0f, volume: Float, blocks: (Float, Float, Float), pans: (Float, Float, Float))(implicit player: MusicPlayer): Unit = {
-    val (block1, block2, block3) = blocks
-    val dur = block1 + block2 + block3
-    val (pan1, pan2, pan3) = pans
-
-    val volumeControl =
-      threeBlockcontrol(0.001f, block1, volume, block2, volume, block3, 0.001f, Right(Instrument.SINE))
-
-    play(startTime, dur,
-      ring(staticControl(majorSpectrum(37)),
-        ring(staticControl(majorSpectrum(29)),
-          moog(noise(volumeControl), majorSpectrum(33)))),
-      threeBlockcontrol(pan1, block1, pan2, block2, pan2, block3, pan3, Right(Instrument.SINE)))
-  }
-
-  def test14detune(startTime: Float, duration: Float, volume: Float, attackTime: Float, pans: (Float, Float))(implicit player: MusicPlayer): Unit = {
-    val (startPan, endPan) = pans
-
-    (0 to 20).foreach {
-      i =>
-        val volumeControl2 =
-          percControl(0.001f, volume, attackTime, Right(Instrument.SINE))
-
-        play(startTime, duration,
-          ring(staticControl(randomFreq(majorSpectrum(37))),
-            ring(staticControl(randomFreq(majorSpectrum(29))),
-              moog(noise(volumeControl2), randomFreq(majorSpectrum(33))))),
-          lineControl(randomPan(startPan), randomPan(endPan)))
-    }
-  }
-
-  def test15single(startTime: Float = 0f, volume: Float, blocks: (Float, Float, Float), pans: (Float, Float, Float))(implicit player: MusicPlayer): Unit = {
-    val (block1, block2, block3) = blocks
-    val dur = block1 + block2 + block3
-    val (pan1, pan2, pan3) = pans
-
-    val volumeControl =
-      threeBlockcontrol(0.001f, block1, volume, block2, volume, block3, 0.001f, Right(Instrument.SINE))
-
-    play(startTime, dur,
-      ring(staticControl(majorSpectrum(5)),
-        ring(staticControl(majorSpectrum(0)),
-          moog(noise(volumeControl), majorSpectrum(3)))),
-      threeBlockcontrol(pan1, block1, pan2, block2, pan2, block3, pan3, Right(Instrument.SINE)))
-  }
-
-  def test15detune(startTime: Float, duration: Float, volume: Float, attackTime: Float, pans: (Float, Float))(implicit player: MusicPlayer): Unit = {
-    val (startPan, endPan) = pans
-
-    (0 to 20).foreach {
-      i =>
-        val volumeControl2 =
-          percControl(0.001f, volume, attackTime, Right(Instrument.SINE))
-
-        play(startTime, duration,
-          ring(staticControl(randomFreq(majorSpectrum(5))),
-            ring(staticControl(randomFreq(majorSpectrum(0))),
-              moog(noise(volumeControl2), randomFreq(majorSpectrum(3))))),
-          lineControl(randomPan(startPan), randomPan(endPan)))
-    }
-
-  }
-
-  def test16single(startTime: Float = 0f, volume: Float, blocks: (Float, Float, Float), pans: (Float, Float, Float), density: Float, freq: Float)(implicit player: MusicPlayer): Unit = {
+  def theme3single(startTime: Float = 0f, volume: Float, blocks: (Float, Float, Float), pans: (Float, Float, Float), density: Float, freq: Float)(implicit player: MusicPlayer): Unit = {
     val (block1, block2, block3) = blocks
     val dur = block1 + block2 + block3
     val (pan1, pan2, pan3) = pans
@@ -387,7 +253,7 @@ object Modular2 {
       threeBlockcontrol(pan1, block1, pan2, block2, pan2, block3, pan3, Right(Instrument.SINE)))
   }
 
-  def test16detune(startTime: Float, duration: Float, volume: Float, attackTime: Float, pans: (Float, Float), density: Float, freq: Float)(implicit player: MusicPlayer): Unit = {
+  def theme3detune(startTime: Float, duration: Float, volume: Float, attackTime: Float, pans: (Float, Float), density: Float, freq: Float)(implicit player: MusicPlayer): Unit = {
     val (startPan, endPan) = pans
 
     (0 to 20).foreach {
@@ -563,7 +429,6 @@ object Modular2 {
   def pulse(value: Float, steps: Int): Seq[Float] =
     (0 until steps).map(_ => value)
 
-
   def exposition(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
     /*
     Regarding rhythm. We could have a very slow ostinato type pulse rhythm that
@@ -593,32 +458,51 @@ object Modular2 {
     * */
 
     val start1 = 0f
-    test10single(start1, 0.7f, (timeSpectrum(9), time, timeSpectrum(49)), (-0.3f, 0.7f, 0.8f))
-    test11single(start1, 0.5f, (timeSpectrum(46), time, timeSpectrum(9)), (0.5f, -0.8f, -0.3f))
-    test12single(start1, 0.7f, (timeSpectrum(28), time, timeSpectrum(26)), (0.2f, -0.2f, 0.2f))
 
-    test10detune(start1 + threeTime - (timeSpectrum(28) / 2), timeSpectrum(28), 0.3f, timeSpectrum(28) / 2, (0.7f, -0.7f))
-    test11detune(start1 + twoTime - (timeSpectrum(47) / 2), timeSpectrum(47), 0.3f, timeSpectrum(47) / 2, (0.2f, -0.4f))
-    test12detune(start1 + (threeTime * 2) - (timeSpectrum(49) / 2), timeSpectrum(49), 0.3f, timeSpectrum(49) / 2, (-0.3f, 0.8f))
+    val theme1chord1 = (majorSpectrum(3), majorSpectrum(33), majorSpectrum(2), majorSpectrum(4))
+    val theme1chord2 = (majorSpectrum(15), majorSpectrum(45), majorSpectrum(20), majorSpectrum(25))
+    val theme1chord3 = (majorSpectrum(36), majorSpectrum(34), majorSpectrum(43), majorSpectrum(39))
+
+    theme1single(start1, 0.7f, (timeSpectrum(9), time, timeSpectrum(49)), (-0.3f, 0.7f, 0.8f), theme1chord1)
+    theme1single(start1, 0.5f, (timeSpectrum(46), time, timeSpectrum(9)), (0.5f, -0.8f, -0.3f), theme1chord2)
+    theme1single(start1, 0.7f, (timeSpectrum(28), time, timeSpectrum(26)), (0.2f, -0.2f, 0.2f), theme1chord3)
+
+    theme1detune(start1 + threeTime - (timeSpectrum(28) / 2), timeSpectrum(28), 0.3f, timeSpectrum(28) / 2, (0.7f, -0.7f), theme1chord1)
+    theme1detune(start1 + twoTime - (timeSpectrum(47) / 2), timeSpectrum(47), 0.3f, timeSpectrum(47) / 2, (0.2f, -0.4f), theme1chord2)
+    theme1detune(start1 + (threeTime * 2) - (timeSpectrum(49) / 2), timeSpectrum(49), 0.3f, timeSpectrum(49) / 2, (-0.3f, 0.8f), theme1chord3)
+
+
+    val theme2chord1 = (majorSpectrum(6), majorSpectrum(5), majorSpectrum(7))
+    val theme2chord2 = (majorSpectrum(33), majorSpectrum(29), majorSpectrum(37))
+    val theme2chord3 = (majorSpectrum(3), majorSpectrum(0), majorSpectrum(5))
 
     val start2 = start1 + time + timeSpectrum(47) + timeSpectrum(28)
-    test13single(start2, 2.5f, (timeSpectrum(9), time, timeSpectrum(49)), (-0.9f, 0.2f, 0.9f))
-    test14single(start2, 0.7f, (timeSpectrum(49), time, timeSpectrum(28)), (0.2f, -0.5f, -0.5f))
-    test15single(start2, 3.5f, (timeSpectrum(28), time, timeSpectrum(46)), (-0.2f, 0.7f, 0.9f))
 
-    test13detune(start2 + threeTime - (timeSpectrum(39) / 2), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (0.5f, -0.2f))
-    test14detune(start2 + twoTime - (timeSpectrum(49) / 2), timeSpectrum(49), 0.2f, timeSpectrum(49) / 2, (0.7f, -0.3f))
-    test15detune(start2 + (threeTime * 2) - (timeSpectrum(43) / 2), timeSpectrum(43), 1.8f, timeSpectrum(43) / 2, (0.8f, 0.4f))
+    theme2single(start2, 2.5f, (timeSpectrum(9), time, timeSpectrum(49)), (-0.9f, 0.2f, 0.9f), theme2chord1)
+    theme2single(start2, 0.7f, (timeSpectrum(49), time, timeSpectrum(28)), (0.2f, -0.5f, -0.5f), theme2chord2)
+    theme2single(start2, 3.5f, (timeSpectrum(28), time, timeSpectrum(46)), (-0.2f, 0.7f, 0.9f), theme2chord3)
+
+    theme2detune(start2 + threeTime - (timeSpectrum(39) / 2), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (0.5f, -0.2f), theme2chord1)
+    theme2detune(start2 + twoTime - (timeSpectrum(49) / 2), timeSpectrum(49), 0.2f, timeSpectrum(49) / 2, (0.7f, -0.3f), theme2chord2)
+    theme2detune(start2 + (threeTime * 2) - (timeSpectrum(43) / 2), timeSpectrum(43), 1.8f, timeSpectrum(43) / 2, (0.8f, 0.4f), theme2chord3)
 
     val start3 = start2 + time + timeSpectrum(46) + timeSpectrum(28)
 
-    test16single(start3, 8.9f, (timeSpectrum(28), time, timeSpectrum(47)), (-0.5f, 0.6f, 0.9f), 3f, majorSpectrum(9))
-    test16single(start3, 8.9f, (timeSpectrum(47), time, timeSpectrum(28)), (0.5f, -0.2f, -0.5f), 5f, majorSpectrum(15))
-    test16single(start3, 8.9f, (timeSpectrum(49), time, timeSpectrum(49)), (0.2f, -0.5f, 0.7f), 8f, majorSpectrum(3))
+    val theme3note1 = majorSpectrum(9)
+    val theme3note2 = majorSpectrum(15)
+    val theme3note3 = majorSpectrum(3)
 
-    test16detune(start3 + threeTime - (timeSpectrum(49) / 2), timeSpectrum(49), 8.9f,  timeSpectrum(49) / 2, (0.8f, 0.2f), 3f, majorSpectrum(9))
-    test16detune(start3  + twoTime - (timeSpectrum(47) / 2), timeSpectrum(47), 8.9f, timeSpectrum(47) / 2, (-0.1f, -0.7f), 5f, majorSpectrum(15))
-    test16detune(start3 + + (threeTime * 2) - (timeSpectrum(28) / 2), timeSpectrum(28), 8.9f, timeSpectrum(28) / 2, (-0.4f, 0.2f), 8f, majorSpectrum(3))
+    theme3single(start3, 8.9f, (timeSpectrum(28), time, timeSpectrum(47)), (-0.5f, 0.6f, 0.9f), 3f, theme3note1)
+    theme3single(start3, 8.9f, (timeSpectrum(47), time, timeSpectrum(28)), (0.5f, -0.2f, -0.5f), 5f, theme3note2)
+    theme3single(start3, 8.9f, (timeSpectrum(49), time, timeSpectrum(49)), (0.2f, -0.5f, 0.7f), 8f, theme3note3)
+
+    theme3detune(start3 + threeTime - (timeSpectrum(49) / 2), timeSpectrum(49), 8.9f,  timeSpectrum(49) / 2, (0.8f, 0.2f), 3f, theme3note1)
+    theme3detune(start3  + twoTime - (timeSpectrum(47) / 2), timeSpectrum(47), 8.9f, timeSpectrum(47) / 2, (-0.1f, -0.7f), 5f, theme3note2)
+    theme3detune(start3 + + (threeTime * 2) - (timeSpectrum(28) / 2), timeSpectrum(28), 8.9f, timeSpectrum(28) / 2, (-0.4f, 0.2f), 8f, theme3note3)
+  }
+
+  def development1(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
+
   }
 
   def main(args: Array[String]): Unit = {
