@@ -16,6 +16,8 @@ s.options.memSize = 2.pow(20);
 s.dumpOSC(1);
 )
 
+
+
 (
 SynthDef(\staticControl, {
 	arg dur = 1, value = 1, out = 0;

@@ -457,7 +457,7 @@ object Modular2 {
     time 65.4064 fourTime 16.3516 threeTime 21.802134 twoTime 32.7032
     * */
 
-    val start1 = 0f
+    val start1 = startTime
 
     val theme1chord1 = (majorSpectrum(3), majorSpectrum(33), majorSpectrum(2), majorSpectrum(4))
     val theme1chord2 = (majorSpectrum(15), majorSpectrum(45), majorSpectrum(20), majorSpectrum(25))
@@ -501,8 +501,47 @@ object Modular2 {
     theme3detune(start3 + + (threeTime * 2) - (timeSpectrum(28) / 2), timeSpectrum(28), 8.9f, timeSpectrum(28) / 2, (-0.4f, 0.2f), 8f, theme3note3)
   }
 
-  def development1(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
 
+  def development1(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
+    val time = majorSpectrum.head
+
+
+    val start1 = startTime
+    val longTime = time / 4 //16
+    val longHalf = longTime / 2
+    val longThree = time / 3
+    val longThreeHalf = longThree / 2
+    val fiveTime = timeSpectrum(47)
+    val threeTime = timeSpectrum(28)
+
+
+    theme1single(start1, 0.7f, (threeTime, longTime, fiveTime), (-0.7f, -0.9f, -0.6f), (majorSpectrum(3), majorSpectrum(33), majorSpectrum(2), majorSpectrum(4)))
+
+    theme1single(start1 + longTime, 0.7f, (fiveTime, longTime, threeTime), (-0.9f, -0.8f, -0.5f), (majorSpectrum(5), majorSpectrum(24), majorSpectrum(1), majorSpectrum(7)))
+
+    theme1detune(start1 + (longTime * 2), longThree, 0.3f, longThreeHalf, (-0.7f, -0.3f), (majorSpectrum(7), majorSpectrum(39), majorSpectrum(15), majorSpectrum(19)))
+
+    theme1single(start1 + (longTime * 3), 0.7f, (threeTime, longTime, threeTime), (-0.2f, -0.5f, -0.1f), (majorSpectrum(23), majorSpectrum(41), majorSpectrum(25), majorSpectrum(31)))
+
+    theme1single(start1 + (longTime * 4), 0.7f, (fiveTime, longTime, fiveTime), (-0.4f, -0.3f, 0.2f), (majorSpectrum(24), majorSpectrum(43), majorSpectrum(27), majorSpectrum(35)))
+
+    theme1detune(start1 + (longTime * 5), longThree, 0.3f, longThreeHalf, (-0.3f, 0.3f), (majorSpectrum(31), majorSpectrum(46), majorSpectrum(29), majorSpectrum(39)))
+
+    theme1single(start1 + (longTime * 5) + longThreeHalf, 0.7f, (threeTime, longTime, fiveTime), (0.2f, 0.4f, 0.5f), (majorSpectrum(31), majorSpectrum(46), majorSpectrum(29), majorSpectrum(39)))
+
+    theme3detune(start1 + (longTime * 6), longThree, 8.9f, longThreeHalf, (0.9f, 0.7f), 3f, majorSpectrum(39))
+
+    theme3single(start1 + (longTime * 6) + longThreeHalf, 8.9f, (threeTime, longTime, fiveTime), (0.5f, 0.4f, 0.2f), 8f, majorSpectrum(39))
+
+    theme3single(start1 + (longTime * 7), 8.9f, (fiveTime, longTime, fiveTime), (0.2f, -0.3f, -0.4f), 8f, majorSpectrum(27))
+
+    theme3single(start1 + (longTime * 8), 8.9f, (threeTime, longTime, threeTime), (-0.1f, -0.5f, -0.2f), 8f, majorSpectrum(23))
+
+    theme3detune(start1 + (longTime * 9), longThree, 8.9f, longThreeHalf, (-0.3f, -0.7f), 3f, majorSpectrum(15))
+
+    theme3single(start1 + (longTime * 10), 8.9f, (fiveTime, longTime, threeTime), (-0.5f, -0.8f, -0.9f), 8f, majorSpectrum(7))
+
+    theme3single(start1 + (longTime * 11), 8.9f, (threeTime, longTime, fiveTime), (-0.6f, -0.9f, -0.7f), 8f, majorSpectrum(3))
   }
 
   def main(args: Array[String]): Unit = {
@@ -510,6 +549,9 @@ object Modular2 {
     player.startPlay()
     setupNodes(player)
 
-    exposition()
+    exposition(0f)
+    val time = majorSpectrum.head
+    val development1Start = (time + timeSpectrum(47) + timeSpectrum(28)) + (time + timeSpectrum(46) + timeSpectrum(28)) + (time + timeSpectrum(49) + timeSpectrum(49) + timeSpectrum(49))
+    development1(development1Start)
   }
 }
