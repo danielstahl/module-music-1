@@ -501,10 +501,8 @@ object Modular2 {
     theme3detune(start3 + + (threeTime * 2) - (timeSpectrum(28) / 2), timeSpectrum(28), 8.9f, timeSpectrum(28) / 2, (-0.4f, 0.2f), 8f, theme3note3)
   }
 
-
   def development1(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
     val time = majorSpectrum.head
-
 
     val start1 = startTime
     val longTime = time / 4 //16
@@ -513,7 +511,6 @@ object Modular2 {
     val longThreeHalf = longThree / 2
     val fiveTime = timeSpectrum(47)
     val threeTime = timeSpectrum(28)
-
 
     theme1single(start1, 0.7f, (threeTime, longTime, fiveTime), (-0.7f, -0.9f, -0.6f), (majorSpectrum(3), majorSpectrum(33), majorSpectrum(2), majorSpectrum(4)))
 
@@ -539,9 +536,52 @@ object Modular2 {
 
     theme3detune(start1 + (longTime * 9), longThree, 8.9f, longThreeHalf, (-0.3f, -0.7f), 3f, majorSpectrum(15))
 
-    theme3single(start1 + (longTime * 10), 8.9f, (fiveTime, longTime, threeTime), (-0.5f, -0.8f, -0.9f), 8f, majorSpectrum(7))
+    theme3single(start1 + (longTime * 10), 9.9f, (fiveTime, longTime, threeTime), (-0.5f, -0.8f, -0.9f), 8f, majorSpectrum(7))
 
-    theme3single(start1 + (longTime * 11), 8.9f, (threeTime, longTime, fiveTime), (-0.6f, -0.9f, -0.7f), 8f, majorSpectrum(3))
+    theme3single(start1 + (longTime * 11), 10.9f, (threeTime, longTime, fiveTime), (-0.6f, -0.9f, -0.7f), 8f, majorSpectrum(3))
+  }
+
+  def development2(startTime: Float = 0f)(implicit player: MusicPlayer): Unit = {
+
+    val time = majorSpectrum.head
+    val longTime = time / 3
+    val longHalf = longTime / 2
+    val longThree = longTime / 3
+
+    val times = Seq(startTime, startTime + longThree, startTime + longHalf, startTime + (longThree * 2),
+      startTime + longTime, startTime + longTime +longThree, startTime + longTime + longHalf, startTime + longTime + (longThree * 2),
+      startTime + (longTime * 2), startTime + (longTime * 2) +longThree, startTime + (longTime * 2) + longHalf, startTime + (longTime * 2) +(longThree * 2),
+    )
+
+    val longFour = (longTime * 3) / 4
+    val fourTimes = Seq(startTime, startTime + longFour, startTime + (longFour * 2), startTime + (longFour * 3))
+    println(s"fourTimes $fourTimes")
+    println(s"times $times")
+
+    /*
+    fourTimes List(0.0, 16.3516, 32.7032, 49.054802)
+times List(0.0, 7.267378, 10.901067, 14.534756, 21.802134, 29.069511, 32.7032, 36.33689, 43.604267, 50.871643, 54.505333, 58.139023)
+    * */
+
+    theme2detune(times.head, timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (0.5f, -0.2f), (majorSpectrum(6), majorSpectrum(5), majorSpectrum(7)))
+    theme2detune(times(1), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (-0.5f, 0.2f), (majorSpectrum(33), majorSpectrum(29), majorSpectrum(37)))
+    theme2detune(times(2), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (0.7f, -0.4f), (majorSpectrum(3), majorSpectrum(0), majorSpectrum(5)))
+    theme2detune(times(3), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (-0.7f, 0.3f), (majorSpectrum(12), majorSpectrum(10), majorSpectrum(15)))
+
+    theme3detune(fourTimes(1), timeSpectrum(39), 8.9f, timeSpectrum(39) / 2, (0.5f, -0.5f), 3f, majorSpectrum(15))
+
+    theme2detune(times(4), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (-0.5f, 0.2f), (majorSpectrum(9), majorSpectrum(7), majorSpectrum(11)))
+    theme2detune(times(5), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (0.5f, -0.2f), (majorSpectrum(40), majorSpectrum(31), majorSpectrum(49)))
+    theme2detune(times(6), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (-0.7f, 0.4f), (majorSpectrum(24), majorSpectrum(19), majorSpectrum(27)))
+    theme2detune(times(7), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (0.7f, -0.3f), (majorSpectrum(10), majorSpectrum(5), majorSpectrum(16)))
+
+    theme2detune(times(8), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (0.2f, -0.5f), (majorSpectrum(2), majorSpectrum(5), majorSpectrum(7)))
+
+    theme3detune(fourTimes(3), timeSpectrum(39), 8.9f, timeSpectrum(39) / 2, (-0.5f, 0.5f), 3f, majorSpectrum(39))
+
+    theme2detune(times(9), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (-0.2f, 0.5f), (majorSpectrum(35), majorSpectrum(30), majorSpectrum(43)))
+    theme2detune(times(10), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (0.4f, -0.7f), (majorSpectrum(18), majorSpectrum(31), majorSpectrum(39)))
+    theme2detune(times(11), timeSpectrum(39), 0.8f, timeSpectrum(39) / 2, (-0.3f, 0.7f), (majorSpectrum(14), majorSpectrum(21), majorSpectrum(36)))
   }
 
   def main(args: Array[String]): Unit = {
@@ -549,9 +589,16 @@ object Modular2 {
     player.startPlay()
     setupNodes(player)
 
+
     exposition(0f)
     val time = majorSpectrum.head
     val development1Start = (time + timeSpectrum(47) + timeSpectrum(28)) + (time + timeSpectrum(46) + timeSpectrum(28)) + (time + timeSpectrum(49) + timeSpectrum(49) + timeSpectrum(49))
     development1(development1Start)
+
+    println(s"dev1 start $development1Start")
+    val development2Start = development1Start + ((majorSpectrum.head / 4) * 13)
+
+    println(s"dev2 start $development2Start")
+    development2(development2Start)
   }
 }
