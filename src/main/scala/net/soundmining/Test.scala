@@ -1,12 +1,12 @@
 package net.soundmining
 
-import net.soundmining.Instrument.{TAIL_ACTION, setupNodes}
-import Instruments._
-import net.soundmining.Utils.absoluteTimeToMillis
-import Note._
+//import net.soundmining.Instrument.{TAIL_ACTION, setupNodes}
+//import Instruments._
+//import net.soundmining.Utils.absoluteTimeToMillis
+//import Note._
 
 object Test {
-
+/*
   def test1(): Unit = {
     implicit val player: MusicPlayer = MusicPlayer()
     player.startPlay()
@@ -281,5 +281,5 @@ object Test {
     test13()
   }
 
-
+*/
 }
