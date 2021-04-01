@@ -8,8 +8,8 @@ import net.soundmining.Spectrum.makeFmSynthesis
 import net.soundmining.synth.Utils.absoluteTimeToMillis
 import Melody._
 import net.soundmining.synth._
-
 import scala.util.Random
+import Modular1._
 
 object Modular2 {
   val majorSidebands = makeFmSynthesis(noteToHertz('c2), noteToHertz('c2) * Spectrum.phi, 50)
@@ -273,19 +273,13 @@ object Modular2 {
   def randomPan(basePan: Double)(implicit r: Random): Double =
     (r.nextDouble() * (1.05 - 0.95) + 0.95) * basePan
 
-
-  val NUM_OUTPUT_BUSES: Int = 66
-
-  def getRealOutputBus(outputBus: Int): Int =
-    outputBus % NUM_OUTPUT_BUSES
-
   def randomBetween(random: Random, minInclusive: Double, maxExclusive: Double): Double =
     random.nextDouble() * (maxExclusive - minInclusive) + minInclusive
 
   def play(startTime: Double, duration: Double, audio: AudioInstrument, panValue: (Double, Double), outputBus: Int)(implicit client: SuperColliderClient): Unit = {
     val pan = panning(audio, lineControl(panValue._1, panValue._2))
       .addAction(TAIL_ACTION)
-    pan.getOutputBus.staticBus(getRealOutputBus(outputBus))
+    pan.getOutputBus.staticBus(client.getRealOutputBus(outputBus))
     val graph = pan.buildGraph(startTime, duration, pan.graph(Seq()))
     client.send(client.newBundle(absoluteTimeToMillis(startTime), graph))
   }
@@ -293,7 +287,7 @@ object Modular2 {
   def play(startTime: Double, duration: Double, audio: AudioInstrument, panControl: ControlInstrument, outputBus: Int)(implicit client: SuperColliderClient): Unit = {
     val pan = panning(audio, panControl)
       .addAction(TAIL_ACTION)
-    pan.getOutputBus.staticBus(getRealOutputBus(outputBus))
+    pan.getOutputBus.staticBus(client.getRealOutputBus(outputBus))
     val graph = pan.buildGraph(startTime, duration, pan.graph(Seq()))
     client.send(client.newBundle(absoluteTimeToMillis(startTime), graph))
   }
@@ -462,20 +456,21 @@ object Modular2 {
     time 65.4064 fourTime 16.3516 threeTime 21.802134 twoTime 32.7032
     * */
 
-    val volume = 32
+    //val volume = 32
+    val volume = 5
     val start1 = startTime
 
     val theme1chord1 = (majorSpectrum(3), majorSpectrum(33), majorSpectrum(2), majorSpectrum(4))
     val theme1chord2 = (majorSpectrum(15), majorSpectrum(45), majorSpectrum(20), majorSpectrum(25))
     val theme1chord3 = (majorSpectrum(36), majorSpectrum(34), majorSpectrum(43), majorSpectrum(39))
 
-    theme1single(start1, 0.7f * volume, (timeSpectrum(9), time, timeSpectrum(49)), (-0.3f, 0.7f, 0.8f), theme1chord1, 2)
-    theme1single(start1, 0.5f * volume, (timeSpectrum(46), time, timeSpectrum(9)), (0.5f, -0.8f, -0.3f), theme1chord2,2)
-    theme1single(start1, 0.7f * volume, (timeSpectrum(28), time, timeSpectrum(26)), (0.2f, -0.2f, 0.2f), theme1chord3, 2)
+    theme1single(start1, 0.7f * volume, (timeSpectrum(9), time, timeSpectrum(49)), (-0.3f, 0.7f, 0.8f), theme1chord1, 0)
+    theme1single(start1, 0.5f * volume, (timeSpectrum(46), time, timeSpectrum(9)), (0.5f, -0.8f, -0.3f), theme1chord2,0)
+    theme1single(start1, 0.7f * volume, (timeSpectrum(28), time, timeSpectrum(26)), (0.2f, -0.2f, 0.2f), theme1chord3, 0)
 
-    theme1detune(start1 + threeTime - (timeSpectrum(28) / 2), timeSpectrum(28), 0.3f * volume, timeSpectrum(28) / 2, (0.7, -0.7), theme1chord1, 4)
-    theme1detune(start1 + twoTime - (timeSpectrum(47) / 2), timeSpectrum(47), 0.3f * volume, timeSpectrum(47) / 2, (0.2, -0.4), theme1chord2, 4)
-    theme1detune(start1 + (threeTime * 2) - (timeSpectrum(49) / 2), timeSpectrum(49), 0.3f * volume, timeSpectrum(49) / 2, (-0.3f, 0.8f), theme1chord3, 4)
+    theme1detune(start1 + threeTime - (timeSpectrum(28) / 2), timeSpectrum(28), 0.3f * volume, timeSpectrum(28) / 2, (0.7, -0.7), theme1chord1, 2)
+    theme1detune(start1 + twoTime - (timeSpectrum(47) / 2), timeSpectrum(47), 0.3f * volume, timeSpectrum(47) / 2, (0.2, -0.4), theme1chord2, 2)
+    theme1detune(start1 + (threeTime * 2) - (timeSpectrum(49) / 2), timeSpectrum(49), 0.3f * volume, timeSpectrum(49) / 2, (-0.3f, 0.8f), theme1chord3, 2)
 
 
     val theme2chord1 = (majorSpectrum(6), majorSpectrum(5), majorSpectrum(7))
@@ -484,13 +479,13 @@ object Modular2 {
 
     val start2 = start1 + time + timeSpectrum(47) + timeSpectrum(28)
 
-    theme2single(start2, 2.3f * volume, (timeSpectrum(9), time, timeSpectrum(49)), (-0.9, 0.2, 0.9), theme2chord1, 6)
-    theme2single(start2, 0.5f * volume, (timeSpectrum(49), time, timeSpectrum(28)), (0.2, -0.5, -0.5), theme2chord2, 6)
-    theme2single(start2, 3.3f * volume, (timeSpectrum(28), time, timeSpectrum(46)), (-0.2, 0.7, 0.9), theme2chord3, 6)
+    theme2single(start2, 2.3f * volume, (timeSpectrum(9), time, timeSpectrum(49)), (-0.9, 0.2, 0.9), theme2chord1, 4)
+    theme2single(start2, 0.5f * volume, (timeSpectrum(49), time, timeSpectrum(28)), (0.2, -0.5, -0.5), theme2chord2, 4)
+    theme2single(start2, 3.3f * volume, (timeSpectrum(28), time, timeSpectrum(46)), (-0.2, 0.7, 0.9), theme2chord3, 4)
 
-    theme2detune(start2 + threeTime - (timeSpectrum(39) / 2), timeSpectrum(39), 0.7 * volume, timeSpectrum(39) / 2, (0.5, -0.2), theme2chord1, 8)
-    theme2detune(start2 + twoTime - (timeSpectrum(49) / 2), timeSpectrum(49), 0.2 * volume, timeSpectrum(49) / 2, (0.7, -0.3), theme2chord2, 8)
-    theme2detune(start2 + (threeTime * 2) - (timeSpectrum(43) / 2), timeSpectrum(43), 1.7 * volume, timeSpectrum(43) / 2, (0.8, 0.4), theme2chord3, 8)
+    theme2detune(start2 + threeTime - (timeSpectrum(39) / 2), timeSpectrum(39), 0.7 * volume, timeSpectrum(39) / 2, (0.5, -0.2), theme2chord1, 6)
+    theme2detune(start2 + twoTime - (timeSpectrum(49) / 2), timeSpectrum(49), 0.2 * volume, timeSpectrum(49) / 2, (0.7, -0.3), theme2chord2, 6)
+    theme2detune(start2 + (threeTime * 2) - (timeSpectrum(43) / 2), timeSpectrum(43), 1.7 * volume, timeSpectrum(43) / 2, (0.8, 0.4), theme2chord3, 6)
 
     val start3 = start2 + time + timeSpectrum(46) + timeSpectrum(28)
 
@@ -498,15 +493,13 @@ object Modular2 {
     val theme3note2 = majorSpectrum(15)
     val theme3note3 = majorSpectrum(3)
 
-    theme3single(start3, 8.9f * volume, (timeSpectrum(28), time, timeSpectrum(47)), (-0.5, 0.6, 0.9), 3, theme3note1, 10)
-    theme3single(start3, 8.9f * volume, (timeSpectrum(47), time, timeSpectrum(28)), (0.5, -0.2, -0.5), 5, theme3note2, 10)
-    theme3single(start3, 8.9f * volume, (timeSpectrum(49), time, timeSpectrum(49)), (0.2, -0.5, 0.7), 8, theme3note3, 10)
+    theme3single(start3, 8.9f * volume, (timeSpectrum(28), time, timeSpectrum(47)), (-0.5, 0.6, 0.9), 3, theme3note1, 8)
+    theme3single(start3, 8.9f * volume, (timeSpectrum(47), time, timeSpectrum(28)), (0.5, -0.2, -0.5), 5, theme3note2, 8)
+    theme3single(start3, 8.9f * volume, (timeSpectrum(49), time, timeSpectrum(49)), (0.2, -0.5, 0.7), 8, theme3note3, 8)
 
-    theme3detune(start3 + threeTime - (timeSpectrum(49) / 2), timeSpectrum(49), 8.9 * volume,  timeSpectrum(49) / 2, (0.8, 0.2), 3, theme3note1, 12)
-    theme3detune(start3  + twoTime - (timeSpectrum(47) / 2), timeSpectrum(47), 8.8 * volume, timeSpectrum(47) / 2, (-0.1, -0.7), 5, theme3note2, 12)
-    theme3detune(start3 + + (threeTime * 2) - (timeSpectrum(28) / 2), timeSpectrum(28), 8.8 * volume, timeSpectrum(28) / 2, (-0.4, 0.2), 8, theme3note3, 12)
-
-
+    theme3detune(start3 + threeTime - (timeSpectrum(49) / 2), timeSpectrum(49), 8.9 * volume,  timeSpectrum(49) / 2, (0.8, 0.2), 3, theme3note1, 10)
+    theme3detune(start3  + twoTime - (timeSpectrum(47) / 2), timeSpectrum(47), 8.8 * volume, timeSpectrum(47) / 2, (-0.1, -0.7), 5, theme3note2, 10)
+    theme3detune(start3 + + (threeTime * 2) - (timeSpectrum(28) / 2), timeSpectrum(28), 8.8 * volume, timeSpectrum(28) / 2, (-0.4, 0.2), 8, theme3note3, 10)
   }
 
   def development1(startTime: Double = 0)(implicit client: SuperColliderClient): Unit = {
@@ -520,35 +513,36 @@ object Modular2 {
     val fiveTime = timeSpectrum(47)
     val threeTime = timeSpectrum(28)
 
-    val volume = 32
+    //val volume = 32
+    val volume = 5
 
-    theme1single(start1, 0.8f * volume, (threeTime, longTime, fiveTime), (-0.7, -0.9, -0.6), (majorSpectrum(3), majorSpectrum(33), majorSpectrum(2), majorSpectrum(4)), 2)
+    theme1single(start1, 0.8f * volume, (threeTime, longTime, fiveTime), (-0.7, -0.9, -0.6), (majorSpectrum(3), majorSpectrum(33), majorSpectrum(2), majorSpectrum(4)), 0)
 
-    theme1single(start1 + longTime, 0.8 * volume, (fiveTime, longTime, threeTime), (-0.9, -0.8, -0.5), (majorSpectrum(5), majorSpectrum(24), majorSpectrum(1), majorSpectrum(7)), 2)
+    theme1single(start1 + longTime, 0.8 * volume, (fiveTime, longTime, threeTime), (-0.9, -0.8, -0.5), (majorSpectrum(5), majorSpectrum(24), majorSpectrum(1), majorSpectrum(7)), 0)
 
-    theme1detune(start1 + (longTime * 2), longThree, 0.4f * volume, longThreeHalf, (-0.7, -0.3), (majorSpectrum(7), majorSpectrum(39), majorSpectrum(15), majorSpectrum(19)), 4)
+    theme1detune(start1 + (longTime * 2), longThree, 0.4f * volume, longThreeHalf, (-0.7, -0.3), (majorSpectrum(7), majorSpectrum(39), majorSpectrum(15), majorSpectrum(19)), 2)
 
-    theme1single(start1 + (longTime * 3), 0.8f * volume, (threeTime, longTime, threeTime), (-0.2f, -0.5f, -0.1f), (majorSpectrum(23), majorSpectrum(41), majorSpectrum(25), majorSpectrum(31)), 2)
+    theme1single(start1 + (longTime * 3), 0.8f * volume, (threeTime, longTime, threeTime), (-0.2f, -0.5f, -0.1f), (majorSpectrum(23), majorSpectrum(41), majorSpectrum(25), majorSpectrum(31)), 0)
 
-    theme1single(start1 + (longTime * 4), 0.8f * volume, (fiveTime, longTime, fiveTime), (-0.4f, -0.3f, 0.2f), (majorSpectrum(24), majorSpectrum(43), majorSpectrum(27), majorSpectrum(35)), 2)
+    theme1single(start1 + (longTime * 4), 0.8f * volume, (fiveTime, longTime, fiveTime), (-0.4f, -0.3f, 0.2f), (majorSpectrum(24), majorSpectrum(43), majorSpectrum(27), majorSpectrum(35)), 0)
 
-    theme1detune(start1 + (longTime * 5), longThree, 0.4f * volume, longThreeHalf, (-0.3f, 0.3f), (majorSpectrum(31), majorSpectrum(46), majorSpectrum(29), majorSpectrum(39)), 4)
+    theme1detune(start1 + (longTime * 5), longThree, 0.4f * volume, longThreeHalf, (-0.3f, 0.3f), (majorSpectrum(31), majorSpectrum(46), majorSpectrum(29), majorSpectrum(39)), 2)
 
-    theme1single(start1 + (longTime * 5) + longThreeHalf, 0.8f * volume, (threeTime, longTime, fiveTime), (0.2f, 0.4f, 0.5f), (majorSpectrum(31), majorSpectrum(46), majorSpectrum(29), majorSpectrum(39)), 2)
+    theme1single(start1 + (longTime * 5) + longThreeHalf, 0.8f * volume, (threeTime, longTime, fiveTime), (0.2f, 0.4f, 0.5f), (majorSpectrum(31), majorSpectrum(46), majorSpectrum(29), majorSpectrum(39)), 0)
 
-    theme3detune(start1 + (longTime * 6), longThree, 8.9f * volume, longThreeHalf, (0.9f, 0.7f), 3f, majorSpectrum(39), 8)
+    theme3detune(start1 + (longTime * 6), longThree, 4.9f * volume, longThreeHalf, (0.9f, 0.7f), 3f, majorSpectrum(39), 6)
 
-    theme3single(start1 + (longTime * 6) + longThreeHalf, 8.9f * volume, (threeTime, longTime, fiveTime), (0.5f, 0.4f, 0.2f), 8f, majorSpectrum(39), 6)
+    theme3single(start1 + (longTime * 6) + longThreeHalf, 6.9f * volume, (threeTime, longTime, fiveTime), (0.5f, 0.4f, 0.2f), 8f, majorSpectrum(39), 4)
 
-    theme3single(start1 + (longTime * 7), 8.9f * volume, (fiveTime, longTime, fiveTime), (0.2f, -0.3f, -0.4f), 8f, majorSpectrum(27), 6)
+    theme3single(start1 + (longTime * 7), 7.9f * volume, (fiveTime, longTime, fiveTime), (0.2f, -0.3f, -0.4f), 8f, majorSpectrum(27), 4)
 
-    theme3single(start1 + (longTime * 8), 8.9f * volume, (threeTime, longTime, threeTime), (-0.1f, -0.5f, -0.2f), 8f, majorSpectrum(23), 6)
+    theme3single(start1 + (longTime * 8), 7.9f * volume, (threeTime, longTime, threeTime), (-0.1f, -0.5f, -0.2f), 8f, majorSpectrum(23), 4)
 
-    theme3detune(start1 + (longTime * 9), longThree, 9.9f * volume, longThreeHalf, (-0.3f, -0.7f), 3f, majorSpectrum(15), 8)
+    theme3detune(start1 + (longTime * 9), longThree, 9.9f * volume, longThreeHalf, (-0.3f, -0.7f), 3f, majorSpectrum(15), 6)
 
-    theme3single(start1 + (longTime * 10), 11.9f * volume, (fiveTime, longTime, threeTime), (-0.5f, -0.8f, -0.9f), 8f, majorSpectrum(7), 6)
+    theme3single(start1 + (longTime * 10), 11.9f * volume, (fiveTime, longTime, threeTime), (-0.5f, -0.8f, -0.9f), 8f, majorSpectrum(7), 4)
 
-    theme3single(start1 + (longTime * 11), 12.9f * volume, (threeTime, longTime, fiveTime), (-0.6f, -0.9f, -0.7f), 8f, majorSpectrum(3), 6)
+    theme3single(start1 + (longTime * 11), 12.9f * volume, (threeTime, longTime, fiveTime), (-0.6f, -0.9f, -0.7f), 8f, majorSpectrum(3), 4)
   }
 
   def development2(startTime: Double = 0f)(implicit client: SuperColliderClient): Unit = {
@@ -573,42 +567,42 @@ object Modular2 {
 times List(0.0, 7.267378, 10.901067, 14.534756, 21.802134, 29.069511, 32.7032, 36.33689, 43.604267, 50.871643, 54.505333, 58.139023)
     * */
 
-    val volume = 32
+    val volume = 4
 
-    theme2detune(times.head, timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (0.5f, -0.2f), (majorSpectrum(6), majorSpectrum(5), majorSpectrum(7)), 2)
-    theme2detune(times(1), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (-0.5f, 0.2f), (majorSpectrum(33), majorSpectrum(29), majorSpectrum(37)), 2)
-    theme2detune(times(2), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (0.7f, -0.4f), (majorSpectrum(3), majorSpectrum(0), majorSpectrum(5)), 2)
-    theme2detune(times(3), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (-0.7f, 0.3f), (majorSpectrum(12), majorSpectrum(10), majorSpectrum(15)), 2)
+    theme2detune(times.head, timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (0.5f, -0.2f), (majorSpectrum(6), majorSpectrum(5), majorSpectrum(7)), 0)
+    theme2detune(times(1), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (-0.5f, 0.2f), (majorSpectrum(33), majorSpectrum(29), majorSpectrum(37)), 0)
+    theme2detune(times(2), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (0.7f, -0.4f), (majorSpectrum(3), majorSpectrum(0), majorSpectrum(5)), 0)
+    theme2detune(times(3), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (-0.7f, 0.3f), (majorSpectrum(12), majorSpectrum(10), majorSpectrum(15)), 0)
 
-    theme3detune(fourTimes(1), timeSpectrum(39), 8.9f * volume, timeSpectrum(39) / 2, (0.5f, -0.5f), 3f, majorSpectrum(15), 4)
+    theme3detune(fourTimes(1), timeSpectrum(39), 8.9f * volume, timeSpectrum(39) / 2, (0.5f, -0.5f), 3f, majorSpectrum(15), 2)
 
-    theme2detune(times(4), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (-0.5f, 0.2f), (majorSpectrum(9), majorSpectrum(7), majorSpectrum(11)), 2)
-    theme2detune(times(5), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (0.5f, -0.2f), (majorSpectrum(40), majorSpectrum(31), majorSpectrum(49)), 2)
-    theme2detune(times(6), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (-0.7f, 0.4f), (majorSpectrum(24), majorSpectrum(19), majorSpectrum(27)), 2)
-    theme2detune(times(7), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (0.7f, -0.3f), (majorSpectrum(10), majorSpectrum(5), majorSpectrum(16)), 2)
+    theme2detune(times(4), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (-0.5f, 0.2f), (majorSpectrum(9), majorSpectrum(7), majorSpectrum(11)), 0)
+    theme2detune(times(5), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (0.5f, -0.2f), (majorSpectrum(40), majorSpectrum(31), majorSpectrum(49)), 0)
+    theme2detune(times(6), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (-0.7f, 0.4f), (majorSpectrum(24), majorSpectrum(19), majorSpectrum(27)), 0)
+    theme2detune(times(7), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (0.7f, -0.3f), (majorSpectrum(10), majorSpectrum(5), majorSpectrum(16)), 0)
 
-    theme2detune(times(8), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (0.2f, -0.5f), (majorSpectrum(2), majorSpectrum(5), majorSpectrum(7)), 2)
+    theme2detune(times(8), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (0.2f, -0.5f), (majorSpectrum(2), majorSpectrum(5), majorSpectrum(7)), 0)
 
-    theme3detune(fourTimes(3), timeSpectrum(39), 8.9f * volume, timeSpectrum(39) / 2, (-0.5f, 0.5f), 3f, majorSpectrum(39), 4)
+    theme3detune(fourTimes(3), timeSpectrum(39), 8.9f * volume, timeSpectrum(39) / 2, (-0.5f, 0.5f), 3f, majorSpectrum(39), 2)
 
-    theme2detune(times(9), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (-0.2f, 0.5f), (majorSpectrum(35), majorSpectrum(30), majorSpectrum(43)), 2)
-    theme2detune(times(10), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (0.4f, -0.7f), (majorSpectrum(18), majorSpectrum(31), majorSpectrum(39)), 2)
-    theme2detune(times(11), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (-0.3f, 0.7f), (majorSpectrum(14), majorSpectrum(21), majorSpectrum(36)), 2)
+    theme2detune(times(9), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (-0.2f, 0.5f), (majorSpectrum(35), majorSpectrum(30), majorSpectrum(43)), 0)
+    theme2detune(times(10), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (0.4f, -0.7f), (majorSpectrum(18), majorSpectrum(31), majorSpectrum(39)), 0)
+    theme2detune(times(11), timeSpectrum(39), 0.8f * volume, timeSpectrum(39) / 2, (-0.3f, 0.7f), (majorSpectrum(14), majorSpectrum(21), majorSpectrum(36)), 0)
   }
 
   def recapitulation(startTime: Double = 0f)(implicit client: SuperColliderClient): Unit = {
     val start1 = startTime
     val time = majorSpectrum.head
 
-    val volume = 32
+    val volume = 5
 
     val theme1chord1 = (majorSpectrum(3), majorSpectrum(33), majorSpectrum(2), majorSpectrum(4))
     val theme1chord2 = (majorSpectrum(15), majorSpectrum(45), majorSpectrum(20), majorSpectrum(25))
     val theme1chord3 = (majorSpectrum(36), majorSpectrum(34), majorSpectrum(43), majorSpectrum(39))
 
-    theme1single(start1, 0.7f * volume, (timeSpectrum(9), time, timeSpectrum(49)), (-0.3f, 0.7f, 0.8f), theme1chord1, 2)
-    theme1single(start1, 0.5f * volume, (timeSpectrum(46), time, timeSpectrum(9)), (0.5f, -0.8f, -0.3f), theme1chord2, 2)
-    theme1single(start1, 0.7f * volume, (timeSpectrum(28), time, timeSpectrum(26)), (0.2f, -0.2f, 0.2f), theme1chord3, 2)
+    theme1single(start1, 0.7f * volume, (timeSpectrum(9), time, timeSpectrum(49)), (-0.3f, 0.7f, 0.8f), theme1chord1, 0)
+    theme1single(start1, 0.5f * volume, (timeSpectrum(46), time, timeSpectrum(9)), (0.5f, -0.8f, -0.3f), theme1chord2, 0)
+    theme1single(start1, 0.7f * volume, (timeSpectrum(28), time, timeSpectrum(26)), (0.2f, -0.2f, 0.2f), theme1chord3, 0)
 
 
     val theme2chord1 = (majorSpectrum(6), majorSpectrum(5), majorSpectrum(7))
@@ -617,9 +611,9 @@ times List(0.0, 7.267378, 10.901067, 14.534756, 21.802134, 29.069511, 32.7032, 3
 
     val start2 = start1
 
-    theme2single(start2, 2.5f * volume, (timeSpectrum(9), time, timeSpectrum(49)), (-0.9f, 0.2f, 0.9f), theme2chord1, 4)
-    theme2single(start2, 0.7f * volume, (timeSpectrum(49), time, timeSpectrum(28)), (0.2f, -0.5f, -0.5f), theme2chord2, 4)
-    theme2single(start2, 3.5f * volume, (timeSpectrum(28), time, timeSpectrum(46)), (-0.2f, 0.7f, 0.9f), theme2chord3, 4)
+    theme2single(start2, 2.5f * volume, (timeSpectrum(9), time, timeSpectrum(49)), (-0.9f, 0.2f, 0.9f), theme2chord1, 2)
+    theme2single(start2, 0.7f * volume, (timeSpectrum(49), time, timeSpectrum(28)), (0.2f, -0.5f, -0.5f), theme2chord2, 2)
+    theme2single(start2, 3.5f * volume, (timeSpectrum(28), time, timeSpectrum(46)), (-0.2f, 0.7f, 0.9f), theme2chord3, 2)
 
     val start3 = start2
 
@@ -627,9 +621,29 @@ times List(0.0, 7.267378, 10.901067, 14.534756, 21.802134, 29.069511, 32.7032, 3
     val theme3note2 = majorSpectrum(15)
     val theme3note3 = majorSpectrum(3)
 
-    theme3single(start3, 8.9f * volume, (timeSpectrum(28), time, timeSpectrum(47)), (-0.5f, 0.6f, 0.9f), 3f, theme3note1, 6)
-    theme3single(start3, 8.9f * volume, (timeSpectrum(47), time, timeSpectrum(28)), (0.5f, -0.2f, -0.5f), 5f, theme3note2, 6)
-    theme3single(start3, 8.9f * volume, (timeSpectrum(49), time, timeSpectrum(49)), (0.2f, -0.5f, 0.7f), 8f, theme3note3, 6)
+    theme3single(start3, 8.9f * volume, (timeSpectrum(28), time, timeSpectrum(47)), (-0.5f, 0.6f, 0.9f), 3f, theme3note1, 4)
+    theme3single(start3, 8.9f * volume, (timeSpectrum(47), time, timeSpectrum(28)), (0.5f, -0.2f, -0.5f), 5f, theme3note2, 4)
+    theme3single(start3, 8.9f * volume, (timeSpectrum(49), time, timeSpectrum(49)), (0.2f, -0.5f, 0.7f), 8f, theme3note3, 4)
+  }
+
+  def playExposition(startTime: Double = 0, reset: Boolean = true): Unit = {
+    if(reset) client.resetClock
+    exposition(startTime)
+  }
+
+  def playDevelopment1(startTime: Double = 0, reset: Boolean = true): Unit = {
+    if(reset) client.resetClock
+    development1(startTime)
+  }
+
+  def playDevelopment2(startTime: Double = 0, reset: Boolean = true): Unit = {
+    if(reset) client.resetClock
+    development2(startTime)
+  }
+
+  def playRecapitulation(startTime: Double = 0, reset: Boolean = true): Unit = {
+    if(reset) client.resetClock
+    recapitulation(startTime)
   }
 
   /*
