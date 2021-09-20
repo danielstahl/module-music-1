@@ -10,7 +10,7 @@ import net.soundmining.synth._
 import net.soundmining.synth.Instrument.{EnvCurve, TAIL_ACTION, setupNodes, EFFECT}
 import SuperColliderClient._
 
-object Modular1 {
+object ModuleMusic1 {
   val SYNTH_DIR = "/Users/danielstahl/Documents/Projects/soundmining-modular/src/main/sc/synths"
   val NUM_OUTPUT_BUSES: Int = 16
   //val NUM_OUTPUT_BUSES: Int = 2
@@ -60,7 +60,7 @@ object Modular1 {
   }
 
   def exposition(startTime: Double = 0)(implicit client: SuperColliderClient): Unit = {
-    val time = (majorSpectrum(3) / 1000f, majorSpectrum(4) / 1000f)
+    val time = (majorSpectrum(3) / 1000, majorSpectrum(4) / 1000)
     val (time1, time2) = time
 
     val pulseStartTime = time1 * 13

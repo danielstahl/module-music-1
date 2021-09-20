@@ -9,9 +9,9 @@ import net.soundmining.synth.Utils.absoluteTimeToMillis
 import Melody._
 import net.soundmining.synth._
 import scala.util.Random
-import Modular1._
+import ModuleMusic1._
 
-object Modular2 {
+object ModuleMusic2 {
   val majorSidebands = makeFmSynthesis(noteToHertz('c2), noteToHertz('c2) * Spectrum.phi, 50)
   val majorSpectrum = majorSidebands.map(_._1)
   val mirroredSpectrum = majorSidebands.map(_._2)

@@ -10,7 +10,7 @@ import net.soundmining.Spectrum.makeFmSynthesis
   * notated music for string quartet. Don't use
   * quarter note.
   */
-object Modular1Acoustic {
+object ModuleMusic1Acoustic {
   val majorSidebands = makeFmSynthesis(noteToHertz('c3), noteToHertz('c2), 50)
   val majorSpectrum = majorSidebands.map(_._1)
   val mirroredSpectrum = majorSidebands.map(_._2)

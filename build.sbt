@@ -2,7 +2,7 @@ name := "modular-i"
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.13.4"
+scalaVersion := "2.13.3"
 
 libraryDependencies += "com.illposed.osc" % "javaosc-core" % "0.2"
 
