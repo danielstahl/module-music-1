@@ -1,4 +1,4 @@
-name := "module-music-"
+name := "module-music-1"
 
 version := "1.0-SNAPSHOT"
 
