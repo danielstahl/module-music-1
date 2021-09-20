@@ -1,4 +1,4 @@
-name := "modular-i"
+name := "module-music-1"
 
 version := "1.0-SNAPSHOT"
 
@@ -18,9 +18,9 @@ libraryDependencies += "com.illposed.osc" % "javaosc-core" % "0.2"
 
 initialCommands in console := """
     |import net.soundmining._
-    |Modular1.init()
+    |ModuleMusic1.init()
 """.trim().stripMargin
 
 cleanupCommands in console += """
-    Modular1.stop()
+    ModuleMusic1.stop()
 """
